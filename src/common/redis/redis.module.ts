@@ -6,7 +6,6 @@ import { REDIS_PROVIDER } from './redis.constant';
 @Module({
   imports: [ConfigModule],
   providers: [
-    // Redis client provider
     {
       provide: REDIS_PROVIDER,
       useFactory: (configService: ConfigService) => {

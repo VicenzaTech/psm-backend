@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBrickTypeDTO } from './dto/create-brick-type.dto';
 import { UpdateBrickTypeDTO } from './dto/update-brick-type.dto';
@@ -14,7 +14,7 @@ export class BrickTypeService {
     constructor(
         private readonly prisma: PrismaService,
         @Inject(REDIS_PROVIDER) private readonly redis: Redis,
-    ) {}
+    ) { }
 
     private getByIdKey(id: number): string {
         return `brick_type:${id}`;
@@ -33,6 +33,14 @@ export class BrickTypeService {
 
     async create(dto: CreateBrickTypeDTO) {
         try {
+            const foundBrick = await this.prisma.brickType.findFirst({
+                where: {
+                    code: dto.code
+                }
+            })
+
+            if (foundBrick) throw new BadRequestException(`Mã gạch ${dto.code} đã tồn tại`)
+
             const created = await this.prisma.brickType.create({
                 data: dto,
             });
@@ -92,6 +100,47 @@ export class BrickTypeService {
             }
         }
 
+        return result;
+    }
+
+    async findAllActiveBrick(params?: { workshopId?: string; type?: string }) {
+        const { workshopId, type } = params || {};
+        const noFilter = !workshopId && !type;
+
+        if (noFilter) {
+            try {
+                const cached = await this.redis.get(this.allCacheKey);
+                if (cached) {
+                    return JSON.parse(cached);
+                }
+            } catch (error) {
+                this.logger.error(`Failed to read brick types from cache`, error.stack);
+            }
+        }
+
+        const where: Prisma.BrickTypeWhereInput = {
+            isActive: true
+        };
+
+        if (workshopId) {
+            where.workshopId = workshopId;
+        }
+
+        if (type) {
+            where.type = type;
+        }
+        const result = await this.prisma.brickType.findMany({
+            where,
+            orderBy: { createdAt: 'desc' },
+        });
+
+        if (noFilter) {
+            try {
+                await this.redis.set(this.allCacheKey, JSON.stringify(result), 'EX', 60);
+            } catch (error) {
+                this.logger.error(`Failed to write brick types to cache`, error.stack);
+            }
+        }
         return result;
     }
 
