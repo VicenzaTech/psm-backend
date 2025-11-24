@@ -19,15 +19,10 @@ export class BrickTypeController {
     findAll(
         @Query('workshopId') workshopId?: string,
         @Query('type') type?: string,
-        @Query('isActive') isActive?: string,
     ) {
-        const parsedIsActive =
-            typeof isActive === 'string' ? (isActive === 'true' ? true : isActive === 'false' ? false : undefined) : undefined;
-
         return this.brickTypeService.findAll({
             workshopId,
             type,
-            isActive: parsedIsActive,
         });
     }
 
