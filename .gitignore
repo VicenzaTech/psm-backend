@@ -106,3 +106,4 @@ test/
 *.test.ts
 *.spec.js
 *.spec.ts
+/generated/prisma
