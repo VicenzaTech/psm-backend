@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum LoaiMai {
+    mai_nong
+    mai_nguoi
+}
+
+model BrickType {
+    id   Int    @id @default(autoincrement())
+    /// "300x600_PORCELAIN"
+    code String @db.VarChar(100) @unique
+    /// "300x600mm Porcelain mài bóng"
+    name String @db.VarChar(200)
+    /// Kích thước hiển thị: "300x600mm"
+    size_x Int
+    size_y Int
+
+    /// Loại gạch (porcelain, granite, ...)
+    type String
+
+    /// Loại mài: mài nóng / người / không mài
+    loaiMai LoaiMai
+
+    /// Thời gian chờ mài người (giờ), nếu có
+    thoiGianChoMaiNguoiHours Int?
+
+    workshopId String
+    /// (Optional) nếu sau này khoán theo dây chuyền
+    productionLineId String
+
+    // Chu kỳ & Sản lượng khoán
+    chuKyKhoan              Int                     // phút
+    sanLuongRaLoPerDay      Decimal @db.Decimal(10, 2)         // m²/ngày
+    sanLuongChinhPhamPerDay Decimal @db.Decimal(10, 2)    // m²/ngày
+
+    /// Số ngày trừ khoán (mặc định 1.5)
+    soNgayTruKhoan          Decimal @db.Decimal(5, 2)  @default(1.5)
+
+    /// Khoán theo số ngày trong tháng
+    sanLuongKhoan30Ngay     Decimal @db.Decimal(10, 2)         // m²
+    sanLuongKhoan31Ngay     Decimal @db.Decimal(10, 2)         // m²
+
+    /// Điều chỉnh khoán khi giảm/tăng chu kỳ
+    congKhoanGiamChuKy      Decimal @db.Decimal(10, 2)          // m²/ngày
+    giamKhoanTangChuKy      Decimal @db.Decimal(10, 2)          // m²/ngày
+
+    isActive  Boolean  @default(true)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt     
+}
