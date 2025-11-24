@@ -3,55 +3,134 @@ generator client {
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 enum LoaiMai {
-    mai_nong
-    mai_nguoi
+  mai_nong
+  mai_nguoi
 }
 
 model BrickType {
-    id   Int    @id @default(autoincrement())
-    /// "300x600_PORCELAIN"
-    code String @db.VarChar(100) @unique
-    /// "300x600mm Porcelain mài bóng"
-    name String @db.VarChar(200)
-    /// Kích thước hiển thị: "300x600mm"
-    size_x Int
-    size_y Int
+  id     Int    @id @default(autoincrement())
+  /// "300x600_PORCELAIN"
+  code   String @unique @db.VarChar(100)
+  /// "300x600mm Porcelain mài bóng"
+  name   String @db.VarChar(200)
+  /// Kích thước hiển thị: "300x600mm"
+  size_x Int
+  size_y Int
 
-    /// Loại gạch (porcelain, granite, ...)
-    type String
+  /// Loại gạch (porcelain, granite, ...)
+  type String
 
-    /// Loại mài: mài nóng / người / không mài
-    loaiMai LoaiMai
+  /// Loại mài: mài nóng / người / không mài
+  loaiMai LoaiMai
 
-    /// Thời gian chờ mài người (giờ), nếu có
-    thoiGianChoMaiNguoiHours Int?
+  /// Thời gian chờ mài người (giờ), nếu có
+  thoiGianChoMaiNguoiHours Int?
 
-    workshopId String
-    /// (Optional) nếu sau này khoán theo dây chuyền
-    productionLineId String
+  workshopId       String
+  /// (Optional) nếu sau này khoán theo dây chuyền
+  productionLineId String
 
-    // Chu kỳ & Sản lượng khoán
-    chuKyKhoan              Int                     // phút
-    sanLuongRaLoPerDay      Decimal @db.Decimal(10, 2)         // m²/ngày
-    sanLuongChinhPhamPerDay Decimal @db.Decimal(10, 2)    // m²/ngày
+  // Chu kỳ & Sản lượng khoán
+  chuKyKhoan              Int // phút
+  sanLuongRaLoPerDay      Decimal @db.Decimal(10, 2) // m²/ngày
+  sanLuongChinhPhamPerDay Decimal @db.Decimal(10, 2) // m²/ngày
 
-    /// Số ngày trừ khoán (mặc định 1.5)
-    soNgayTruKhoan          Decimal @db.Decimal(5, 2)  @default(1.5)
+  /// Số ngày trừ khoán (mặc định 1.5)
+  soNgayTruKhoan Decimal @default(1.5) @db.Decimal(5, 2)
 
-    /// Khoán theo số ngày trong tháng
-    sanLuongKhoan30Ngay     Decimal @db.Decimal(10, 2)         // m²
-    sanLuongKhoan31Ngay     Decimal @db.Decimal(10, 2)         // m²
+  /// Khoán theo số ngày trong tháng
+  sanLuongKhoan30Ngay Decimal @db.Decimal(10, 2) // m²
+  sanLuongKhoan31Ngay Decimal @db.Decimal(10, 2) // m²
 
-    /// Điều chỉnh khoán khi giảm/tăng chu kỳ
-    congKhoanGiamChuKy      Decimal @db.Decimal(10, 2)          // m²/ngày
-    giamKhoanTangChuKy      Decimal @db.Decimal(10, 2)          // m²/ngày
+  /// Điều chỉnh khoán khi giảm/tăng chu kỳ
+  congKhoanGiamChuKy Decimal @db.Decimal(10, 2) // m²/ngày
+  giamKhoanTangChuKy Decimal @db.Decimal(10, 2) // m²/ngày
 
-    isActive  Boolean  @default(true)
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt     
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ActivityLog {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  userId       Int    @map("user_id")
+  username     String @db.VarChar(50)
+  userFullName String @map("user_full_name") @db.VarChar(100)
+
+  action     String @db.VarChar(50)
+  actionType String @map("action_type") @db.VarChar(20)
+
+  entityType String  @map("entity_type") @db.VarChar(30)
+  entityId   Int?    @map("entity_id")
+  entityName String? @map("entity_name") @db.VarChar(200)
+
+  description String @db.Text
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([actionType])
+  @@index([createdAt])
+  @@map("activity_logs")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique @db.VarChar(50)
+  email        String  @unique @db.VarChar(150)
+  fullName     String   @map("full_name") @db.VarChar(150)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  isActive     Boolean  @default(true) @map("is_active")
+
+  lastLoginAt  DateTime? @map("last_login_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt      @map("updated_at")
+
+  roles        Role[]      @relation("UserRoles")
+
+  activityLogs ActivityLog[]
+
+  @@index([isActive])
+  @@index([username])
+  @@map("users")
+}
+
+model Role {
+  id          Int      @id @default(autoincrement())
+  code        String   @unique @db.VarChar(50)   // super_admin, admin, ...
+  name        String   @db.VarChar(100)
+  description String?  @db.VarChar(255)
+  isActive    Boolean  @default(true) @map("is_active")
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt      @map("updated_at")
+
+  users       User[]        @relation("UserRoles")
+  permissions Permission[]  @relation("RolePermissions")
+
+  @@index([isActive])
+  @@map("roles")
+}
+
+model Permission {
+  id          Int      @id @default(autoincrement())
+  code        String   @unique @db.VarChar(100) // "user.view", ...
+  name        String   @db.VarChar(150)
+  description String?  @db.VarChar(255)
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt      @map("updated_at")
+
+  roles       Role[] @relation("RolePermissions")
+
+  @@map("permissions")
 }
