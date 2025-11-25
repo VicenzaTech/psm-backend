@@ -27,6 +27,10 @@ async function bootstrap() {
     );
 
     app.useGlobalInterceptors(new ResponseFormatInterceptor(activityLogProviderService))
+    app.useGlobalInterceptors(new ResponseFormatInterceptor())
+    app.enableCors([
+        "http://localhost:3002"
+    ])
     // Use middleware
     app.use(compression());
     app.use(cookieParser());
@@ -36,6 +40,6 @@ async function bootstrap() {
     // Initial Validation Pipe
 
     // Interceptor
-    await app.listen(6667);
+    await app.listen(3000);
 }
 bootstrap();
