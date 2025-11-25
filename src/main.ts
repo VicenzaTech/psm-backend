@@ -27,7 +27,6 @@ async function bootstrap() {
     );
 
     app.useGlobalInterceptors(new ResponseFormatInterceptor(activityLogProviderService))
-    app.useGlobalInterceptors(new ResponseFormatInterceptor())
     app.enableCors([
         "http://localhost:3002"
     ])
