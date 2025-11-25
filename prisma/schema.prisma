@@ -56,37 +56,86 @@ model BrickType {
   updatedAt DateTime @updatedAt
 }
 
+// ===============================
+// ENUM GỢI Ý
+// ===============================
+enum ActivityEntityType {
+  User
+  BrickType
+  ProductionPlan
+  StageAssignment
+  DailyStageProduction
+  QualityRecord
+  MeasurementCache
+  Workshop
+  ProductionLine
+  Device
+  DeviceCluster
+  Setting
+  Other
+  Attachment
+  ApiToken
+  MeasurementType
+  SalaryPeriod
+}
+
+enum ActivityStatus {
+  SUCCESS
+  FAILED
+}
+
+enum ActivitySeverity {
+  INFO
+  WARNING
+  ERROR
+  SECURITY // hành động nhạy cảm: phân quyền, đổi mật khẩu, v.v.
+}
+
+enum ActivitySource {
+  WEB_ADMIN
+  WEB_APP
+  API
+  IOT_SYNC
+  JOB      // cron / background job
+  SYSTEM   // hành động hệ thống tự làm
+}
+// ===============================
+// ACTIVITY LOG
+// ===============================
 model ActivityLog {
   id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
 
-  userId       Int    @map("user_id")
-  username     String @db.VarChar(50)
-  userFullName String @map("user_full_name") @db.VarChar(100)
-
-  action     String @db.VarChar(50)
-  actionType String @map("action_type") @db.VarChar(20)
-
-  entityType String  @map("entity_type") @db.VarChar(30)
-  entityId   Int?    @map("entity_id")
-  entityName String? @map("entity_name") @db.VarChar(200)
-
-  description String @db.Text
-
+  // WHO: cho phép null để log cả action "system"
+  userId       Int?    @map("user_id")
+  // WHAT
+  action     String              @db.VarChar(80)      // mã hành động cụ thể: "UPDATE_BRICK_TYPE", "RUN_SALARY_JOB"
+  actionType String              @map("action_type")  // nhóm hành động
+  // ON WHICH ENTITY
+  entityType ActivityEntityType? @map("entity_type")
+  entityId   Int?                @map("entity_id")
+  entityName String?             @map("entity_name") @db.VarChar(200)
+  // RESULT + CONTEXT
+  status   ActivityStatus   // SUCCESS / FAILED
+  severity ActivitySeverity // INFO / WARNING / ERROR / SECURITY
+  source   ActivitySource   // WEB_ADMIN / API / IOT_SYNC / JOB / SYSTEM
+  metadata Json?            // JSON nhẹ: { before, after, extraCodes }
+  // EXTRA INFO
+  description String? @db.Text
   createdAt DateTime @default(now()) @map("created_at")
-
-  user User @relation(fields: [userId], references: [id])
-
-  @@index([userId])
-  @@index([entityType, entityId])
-  @@index([actionType])
+  user User? @relation(fields: [userId], references: [id])
+  @@index([userId, createdAt])
+  @@index([entityType, entityId, createdAt])
+  @@index([actionType, createdAt])
+  @@index([source, createdAt])
   @@index([createdAt])
   @@map("activity_logs")
 }
 
+
 model User {
   id           Int      @id @default(autoincrement())
   username     String   @unique @db.VarChar(50)
-  email        String  @unique @db.VarChar(150)
+  email        String   @unique @db.VarChar(150)
   fullName     String   @map("full_name") @db.VarChar(150)
   passwordHash String   @map("password_hash") @db.VarChar(255)
   isActive     Boolean  @default(true) @map("is_active")

@@ -30,7 +30,7 @@ import { AuthGuard } from './guard/auth/auth.guard';
         UserModule,
         SessionModule,
         HashModule,
-        ConfigModule
+        ConfigModule,
     ],
     exports: [JwtModule, AuthService, AuthGuard, UserModule, SessionModule],
 })

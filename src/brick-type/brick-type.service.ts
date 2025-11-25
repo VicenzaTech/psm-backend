@@ -5,7 +5,9 @@ import { UpdateBrickTypeDTO } from './dto/update-brick-type.dto';
 import { REDIS_PROVIDER } from '../common/redis/redis.constant';
 import Redis from 'ioredis';
 import { Prisma } from '@prisma/client';
-
+import { ActivityLogProviderService } from 'src/common/queue/activity-log.queue/activity-log.provider';
+import { ActivityEntityType } from 'src/activity-log/activity-log.enum';
+import { OkResponse } from 'src/common/type/response.type';
 @Injectable()
 export class BrickTypeService {
     private readonly logger = new Logger(BrickTypeService.name);
@@ -14,6 +16,7 @@ export class BrickTypeService {
     constructor(
         private readonly prisma: PrismaService,
         @Inject(REDIS_PROVIDER) private readonly redis: Redis,
+        private readonly activityLogProviderService: ActivityLogProviderService,
     ) { }
 
     private getByIdKey(id: number): string {
@@ -35,19 +38,28 @@ export class BrickTypeService {
         try {
             const foundBrick = await this.prisma.brickType.findFirst({
                 where: {
-                    code: dto.code
-                }
-            })
+                    code: dto.code,
+                },
+            });
 
-            if (foundBrick) throw new BadRequestException(`Mã gạch ${dto.code} đã tồn tại`)
+            if (foundBrick) {
+                throw new BadRequestException(`Brick code ${dto.code} already exists`);
+            }
 
             const created = await this.prisma.brickType.create({
                 data: dto,
             });
 
             await this.invalidateCache(created.id);
-
-            return created;
+            return {
+                data: created,
+                log: {
+                    entityType: ActivityEntityType.BrickType,
+                    action: "CREATE_BRICK_TYPE",
+                    description: `${created.name} đã được tạo mới`,
+                    actionType: "CREATE_BRICK_TYPE",
+                }
+            } as OkResponse
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
                 this.logger.warn(`Duplicate brick type code: ${dto.code}`);
@@ -119,7 +131,7 @@ export class BrickTypeService {
         }
 
         const where: Prisma.BrickTypeWhereInput = {
-            isActive: true
+            isActive: true,
         };
 
         if (workshopId) {
@@ -174,7 +186,7 @@ export class BrickTypeService {
     }
 
     async update(id: number, dto: UpdateBrickTypeDTO) {
-        await this.ensureExists(id);
+        const found = await this.ensureExists(id);
 
         const updated = await this.prisma.brickType.update({
             where: { id },
@@ -183,7 +195,15 @@ export class BrickTypeService {
 
         await this.invalidateCache(id);
 
-        return updated;
+        return {
+            data: updated,
+            log: {
+                entityType: ActivityEntityType.BrickType,
+                action: "UPDATE_BRICK_TYPE",
+                description: `${updated.name} đã bị xóa`,
+                actionType: "UPDATE_BRICK_TYPE",
+            }
+        } as OkResponse
     }
 
     async remove(id: number) {
@@ -195,8 +215,15 @@ export class BrickTypeService {
         });
 
         await this.invalidateCache(id);
-
-        return updated;
+        return {
+            data: updated,
+            log: {
+                entityType: ActivityEntityType.BrickType,
+                action: "DISABLE_BRICK_TYPE",
+                description: `${updated.name} đã bị xóa`,
+                actionType: "DISABLE_BRICK_TYPE",
+            }
+        } as OkResponse
     }
 
     private async ensureExists(id: number): Promise<void> {
