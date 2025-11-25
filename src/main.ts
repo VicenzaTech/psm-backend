@@ -6,11 +6,13 @@ import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import { ConfigService } from '@nestjs/config';
 import { ResponseFormatInterceptor } from './common/interceptor/response-format/response-format.interceptor';
+import { ActivityLogProviderService } from './common/queue/activity-log.queue/activity-log.provider';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
     app.setGlobalPrefix('/api')
     const config = app.get(ConfigService);
+    const activityLogProviderService = app.get(ActivityLogProviderService)
     const port = config.get<number>('app.port', { infer: true });
     // Use common
     app.useGlobalPipes(
@@ -24,6 +26,7 @@ async function bootstrap() {
         }),
     );
 
+    app.useGlobalInterceptors(new ResponseFormatInterceptor(activityLogProviderService))
     app.useGlobalInterceptors(new ResponseFormatInterceptor())
     app.enableCors([
         "http://localhost:3002"

@@ -12,7 +12,7 @@ import { SessionGuard } from './guard/session/session.guard';
 export class AuthController {
     constructor(
         private authService: AuthService,
-        private configService: ConfigService
+        private configService: ConfigService,
     ) { }
 
     @Post('/login')
@@ -20,12 +20,12 @@ export class AuthController {
         const expired = this.configService.get('JWT_REFRESH_EXPIRES')
         const expired_ms = Number((ms(expired)))
         const loginData = await this.authService.login(loginDto)
-        res.cookie(COOKIE_KEY.REFRESH_TOKEN_KEY, loginData.tokens.refreshtoken, {
+        res.cookie(COOKIE_KEY.REFRESH_TOKEN_KEY, loginData.data.tokens.refreshtoken, {
             httpOnly: true,
             secure: true,
             maxAge: expired_ms
         })
-        res.cookie(COOKIE_KEY.SESSION_ID_KEY, loginData.sessionId, {
+        res.cookie(COOKIE_KEY.SESSION_ID_KEY, loginData.data.sessionId, {
             httpOnly: true,
             secure: true,
             maxAge: expired_ms
@@ -36,10 +36,10 @@ export class AuthController {
     @Post('/logout')
     @UseGuards(SessionGuard)
     async logout(@Req() req, @Res({ passthrough: true }) res: Response) {
-        // 1. logout if received user request
         // 2. force logout if expired token
         const sessionId = req.sessionId
-        const logoutData = await this.authService.logout(sessionId)
+        const user = req.user
+        const logoutData = await this.authService.logout(user, sessionId)
         res.clearCookie(COOKIE_KEY.REFRESH_TOKEN_KEY, {
             httpOnly: true,
         })
