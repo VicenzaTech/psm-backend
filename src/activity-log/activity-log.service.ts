@@ -27,10 +27,6 @@ export class ActivityLogService {
         } = dto
 
         const where: any = {}
-        if (!Object.values(ActivityEntityType).includes(entityType as any)) {
-            throw new BadRequestException('Loại thông báo không phù hợp');
-        }
-     
         if (actionType) {
             where.actionType = actionType
         }

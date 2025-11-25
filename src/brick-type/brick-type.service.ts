@@ -196,7 +196,7 @@ export class BrickTypeService {
             log: {
                 entityType: ActivityEntityType.BrickType,
                 action: "UPDATE_BRICK_TYPE",
-                description: `${updated.name} đã bị xóa`,
+                description: `${updated.name} đã được cập nhật`,
                 actionType: "UPDATE_BRICK_TYPE",
             }
         } as OkResponse
