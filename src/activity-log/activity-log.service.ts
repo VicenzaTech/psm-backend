@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { PaginationDTO } from 'src/common/type/pagination.type';
 import { LogDTO } from './dto/log.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { ActivityEntityType } from './activity-log.enum';
+import { ActivityEntityType, ActivityStatus } from './activity-log.enum';
 import { ActivityAction } from './activity-log.action'
 @Injectable()
 export class ActivityLogService {
