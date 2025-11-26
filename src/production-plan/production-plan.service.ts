@@ -87,15 +87,15 @@ export class ProductionPlanService {
             where: { planCode },
             select: { id: true },
         });
-
         if (existingCode) {
             throw new BadRequestException(`Production plan code "${planCode}" already exists`);
         }
+        console.log("foundBrickType:", brickTypeId);
 
         const foundBrickType = await this.brickTypeService.ensureExists(brickTypeId);
-        if (!foundBrickType.isActive) {
-            throw new BadRequestException(`Brick type with id ${brickTypeId} is inactive`);
-        }
+        // if (!foundBrickType.isActive) {
+        //     throw new BadRequestException(`Brick type with id ${brickTypeId} is inactive`);
+        // }
 
         const foundProductionLine = await this.productionLineService.ensureExists(productionLineId);
         if (!foundProductionLine.isActive) {
@@ -157,11 +157,6 @@ export class ProductionPlanService {
 
         if (dto.brickTypeId) {
             const brick = await this.brickTypeService.ensureExists(dto.brickTypeId);
-            if (!brick.isActive) {
-                throw new BadRequestException(
-                    `Brick type with id ${dto.brickTypeId} is inactive`,
-                );
-            }
         }
 
         if (dto.productionLineId) {

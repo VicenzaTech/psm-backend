@@ -5,740 +5,189 @@ import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
-// Mock data for BrickType with camelCase keys
-const mockBrickTypes = [
-  {
-    id: 1,
-    name: '300x600mm Porcelain mài bóng',
-    size: '300x600mm',
-    type: 'porcelain',
-    workshopId: '1',
-    productionLineId: '1',
-    chuKyKhoan: 50,
-    sanLuongRaLoPerDay: 10037,
-    sanLuongChinhPhamPerDay: 9590,
-    soNgayTruKhoan: 1.5,
-    sanLuongKhoan30Ngay: 273300,
-    sanLuongKhoan31Ngay: 282900,
-    congKhoanGiamChuKy: 98,
-    giamKhoanTangChuKy: 147,
-    loaiMai: 'mai_nong',
-    thoiGianChoMaiNguoiHours: 0,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 2,
-    name: '300x600mm Granite dày 12mm',
-    size: '300x600mm',
-    type: 'granite',
-    workshopId: '1',
-    productionLineId: '1',
-    chuKyKhoan: 52,
-    sanLuongRaLoPerDay: 9665,
-    sanLuongChinhPhamPerDay: 9230,
-    soNgayTruKhoan: 1.5,
-    sanLuongKhoan30Ngay: 263100,
-    sanLuongKhoan31Ngay: 272300,
-    congKhoanGiamChuKy: 90,
-    giamKhoanTangChuKy: 136,
-    loaiMai: 'mai_nong',
-    thoiGianChoMaiNguoiHours: 0,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 3,
-    name: '400x800mm Granite mài bóng',
-    size: '400x800mm',
-    type: 'granite',
-    workshopId: '1',
-    productionLineId: '1',
-    chuKyKhoan: 48,
-    sanLuongRaLoPerDay: 11792,
-    sanLuongChinhPhamPerDay: 11260,
-    soNgayTruKhoan: 1.5,
-    sanLuongKhoan30Ngay: 320900,
-    sanLuongKhoan31Ngay: 332200,
-    congKhoanGiamChuKy: 120,
-    giamKhoanTangChuKy: 180,
-    loaiMai: 'mai_nong',
-    thoiGianChoMaiNguoiHours: 0,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 4,
-    name: '400x800mm Granite dày 12mm',
-    size: '400x800mm',
-    type: 'granite',
-    workshopId: '1',
-    productionLineId: '1',
-    chuKyKhoan: 50,
-    sanLuongRaLoPerDay: 11321,
-    sanLuongChinhPhamPerDay: 10810,
-    soNgayTruKhoan: 1.5,
-    sanLuongKhoan30Ngay: 308100,
-    sanLuongKhoan31Ngay: 318900,
-    congKhoanGiamChuKy: 110,
-    giamKhoanTangChuKy: 165,
-    loaiMai: 'mai_nong',
-    thoiGianChoMaiNguoiHours: 0,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 5,
-    name: '400x600mm Granite dày',
-    size: '400x600mm',
-    type: 'granite',
-    workshopId: '1',
-    productionLineId: '1',
-    chuKyKhoan: 50,
-    sanLuongRaLoPerDay: 11454,
-    sanLuongChinhPhamPerDay: 11000,
-    soNgayTruKhoan: 1.5,
-    sanLuongKhoan30Ngay: 313500,
-    sanLuongKhoan31Ngay: 324500,
-    congKhoanGiamChuKy: 112,
-    giamKhoanTangChuKy: 168,
-    loaiMai: 'mai_nong',
-    thoiGianChoMaiNguoiHours: 0,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 6,
-    name: '800x800mm Porcelain',
-    size: '800x800mm',
-    type: 'porcelain',
-    workshopId: '1',
-    productionLineId: '1',
-    chuKyKhoan: 44,
-    sanLuongRaLoPerDay: 13122,
-    sanLuongChinhPhamPerDay: 12600,
-    soNgayTruKhoan: 1.5,
-    sanLuongKhoan30Ngay: 359100,
-    sanLuongKhoan31Ngay: 371700,
-    congKhoanGiamChuKy: 146,
-    giamKhoanTangChuKy: 220,
-    loaiMai: 'mai_nong',
-    thoiGianChoMaiNguoiHours: 0,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 7,
-    name: '600x600mm Porcelain',
-    size: '600x600mm',
-    type: 'porcelain',
-    workshopId: '1',
-    productionLineId: '1',
-    chuKyKhoan: 44,
-    sanLuongRaLoPerDay: 12997,
-    sanLuongChinhPhamPerDay: 12480,
-    soNgayTruKhoan: 1.5,
-    sanLuongKhoan30Ngay: 355700,
-    sanLuongKhoan31Ngay: 368200,
-    congKhoanGiamChuKy: 145,
-    giamKhoanTangChuKy: 218,
-    loaiMai: 'mai_nong',
-    thoiGianChoMaiNguoiHours: 0,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 8,
-    name: '600x600mm Semi men bóng',
-    size: '600x600mm',
-    type: 'semi_porcelain',
-    workshopId: '1',
-    productionLineId: '1',
-    chuKyKhoan: 43,
-    sanLuongRaLoPerDay: 13299,
-    sanLuongChinhPhamPerDay: 12770,
-    soNgayTruKhoan: 1.5,
-    sanLuongKhoan30Ngay: 363900,
-    sanLuongKhoan31Ngay: 376700,
-    congKhoanGiamChuKy: 152,
-    giamKhoanTangChuKy: 228,
-    loaiMai: 'mai_nong',
-    thoiGianChoMaiNguoiHours: 0,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 9,
-    name: '600x600mm Porcelain',
-    size: '600x600mm',
-    type: 'porcelain',
-    workshopId: '1',
-    productionLineId: '2',
-    chuKyKhoan: 42,
-    sanLuongRaLoPerDay: 15953,
-    sanLuongChinhPhamPerDay: 15310,
-    soNgayTruKhoan: 1.5,
-    sanLuongKhoan30Ngay: 436300,
-    sanLuongKhoan31Ngay: 451600,
-    congKhoanGiamChuKy: 187,
-    giamKhoanTangChuKy: 280,
-    loaiMai: 'mai_nong',
-    thoiGianChoMaiNguoiHours: 0,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 10,
-    name: '600x600mm Semi men bóng',
-    size: '600x600mm',
-    type: 'semi_porcelain',
-    workshopId: '1',
-    productionLineId: '2',
-    chuKyKhoan: 41,
-    sanLuongRaLoPerDay: 16342,
-    sanLuongChinhPhamPerDay: 15690,
-    soNgayTruKhoan: 1.5,
-    sanLuongKhoan30Ngay: 447200,
-    sanLuongKhoan31Ngay: 462900,
-    congKhoanGiamChuKy: 196,
-    giamKhoanTangChuKy: 294,
-    loaiMai: 'mai_nong',
-    thoiGianChoMaiNguoiHours: 0,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 11,
-    name: '800x800mm Porcelain',
-    size: '800x800mm',
-    type: 'porcelain',
-    workshopId: '1',
-    productionLineId: '2',
-    chuKyKhoan: 47,
-    sanLuongRaLoPerDay: 14335,
-    sanLuongChinhPhamPerDay: 13760,
-    soNgayTruKhoan: 1.5,
-    sanLuongKhoan30Ngay: 392200,
-    sanLuongKhoan31Ngay: 405900,
-    congKhoanGiamChuKy: 150,
-    giamKhoanTangChuKy: 224,
-    loaiMai: 'mai_nong',
-    thoiGianChoMaiNguoiHours: 0,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 12,
-    name: '600x600mm Granite dày 12mm',
-    size: '600x600mm',
-    type: 'granite',
-    workshopId: '1',
-    productionLineId: '2',
-    chuKyKhoan: 45,
-    sanLuongRaLoPerDay: 14889,
-    sanLuongChinhPhamPerDay: 14290,
-    soNgayTruKhoan: 1.5,
-    sanLuongKhoan30Ngay: 407300,
-    sanLuongKhoan31Ngay: 421600,
-    congKhoanGiamChuKy: 162,
-    giamKhoanTangChuKy: 244,
-    loaiMai: 'mai_nong',
-    thoiGianChoMaiNguoiHours: 0,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 13,
-    name: '500x500mm Semi-Porcelain',
-    size: '500x500mm',
-    type: 'semi_porcelain',
-    workshopId: '1',
-    productionLineId: '2',
-    chuKyKhoan: 43,
-    sanLuongRaLoPerDay: 16857,
-    sanLuongChinhPhamPerDay: 16180,
-    soNgayTruKhoan: 1.5,
-    sanLuongKhoan30Ngay: 461100,
-    sanLuongKhoan31Ngay: 477300,
-    congKhoanGiamChuKy: 193,
-    giamKhoanTangChuKy: 289,
-    loaiMai: 'mai_nong',
-    thoiGianChoMaiNguoiHours: 0,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 14,
-    name: '500x500mm Granite dày 12mm',
-    size: '500x500mm',
-    type: 'granite',
-    workshopId: '1',
-    productionLineId: '2',
-    chuKyKhoan: 46,
-    sanLuongRaLoPerDay: 15363,
-    sanLuongChinhPhamPerDay: 14750,
-    soNgayTruKhoan: 1.5,
-    sanLuongKhoan30Ngay: 420400,
-    sanLuongKhoan31Ngay: 435100,
-    congKhoanGiamChuKy: 164,
-    giamKhoanTangChuKy: 246,
-    loaiMai: 'mai_nong',
-    thoiGianChoMaiNguoiHours: 0,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 15,
-    name: '500x500mm Granite dày 9,5mm',
-    size: '500x500mm',
-    type: 'granite',
-    workshopId: '1',
-    productionLineId: '2',
-    chuKyKhoan: 43,
-    sanLuongRaLoPerDay: 16434,
-    sanLuongChinhPhamPerDay: 15780,
-    soNgayTruKhoan: 1.5,
-    sanLuongKhoan30Ngay: 449700,
-    sanLuongKhoan31Ngay: 465500,
-    congKhoanGiamChuKy: 188,
-    giamKhoanTangChuKy: 282,
-    loaiMai: 'mai_nong',
-    thoiGianChoMaiNguoiHours: 0,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 16,
-    name: '800x800mm Porcelain',
-    size: '800x800mm',
-    type: 'porcelain',
-    workshopId: '2',
-    productionLineId: '5',
-    chuKyKhoan: 44,
-    sanLuongRaLoPerDay: 19535,
-    sanLuongChinhPhamPerDay: 18660,
-    soNgayTruKhoan: 1.5,
-    sanLuongKhoan30Ngay: 531800,
-    sanLuongKhoan31Ngay: 550500,
-    congKhoanGiamChuKy: 217,
-    giamKhoanTangChuKy: 325,
-    loaiMai: 'mai_nong',
-    thoiGianChoMaiNguoiHours: 0,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 17,
-    name: '600x600mm Porcelain',
-    size: '600x600mm',
-    type: 'porcelain',
-    workshopId: '2',
-    productionLineId: '5',
-    chuKyKhoan: 47,
-    sanLuongRaLoPerDay: 18072,
-    sanLuongChinhPhamPerDay: 17260,
-    soNgayTruKhoan: 1.5,
-    sanLuongKhoan30Ngay: 491900,
-    sanLuongKhoan31Ngay: 509200,
-    congKhoanGiamChuKy: 188,
-    giamKhoanTangChuKy: 281,
-    loaiMai: 'mai_nong',
-    thoiGianChoMaiNguoiHours: 0,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 18,
-    name: '150x800mm Porcelain',
-    size: '150x800mm',
-    type: 'porcelain',
-    workshopId: '2',
-    productionLineId: '5',
-    chuKyKhoan: 58,
-    sanLuongRaLoPerDay: 16841,
-    sanLuongChinhPhamPerDay: 16080,
-    soNgayTruKhoan: 1.5,
-    sanLuongKhoan30Ngay: 458300,
-    sanLuongKhoan31Ngay: 474400,
-    congKhoanGiamChuKy: 141,
-    giamKhoanTangChuKy: 212,
-    loaiMai: 'mai_nong',
-    thoiGianChoMaiNguoiHours: 0,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 19,
-    name: '1000x1000mm Granite',
-    size: '1000x1000mm',
-    type: 'granite',
-    workshopId: '2',
-    productionLineId: '5',
-    chuKyKhoan: 63,
-    sanLuongRaLoPerDay: 11161,
-    sanLuongChinhPhamPerDay: 10660,
-    soNgayTruKhoan: 1.5,
-    sanLuongKhoan30Ngay: 303800,
-    sanLuongKhoan31Ngay: 314500,
-    congKhoanGiamChuKy: 86,
-    giamKhoanTangChuKy: 129,
-    loaiMai: 'mai_nong',
-    thoiGianChoMaiNguoiHours: 0,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 20,
-    name: '600x1200mm Granite',
-    size: '600x1200mm',
-    type: 'granite',
-    workshopId: '2',
-    productionLineId: '5',
-    chuKyKhoan: 60,
-    sanLuongRaLoPerDay: 13875,
-    sanLuongChinhPhamPerDay: 13250,
-    soNgayTruKhoan: 1.5,
-    sanLuongKhoan30Ngay: 377600,
-    sanLuongKhoan31Ngay: 390900,
-    congKhoanGiamChuKy: 112,
-    giamKhoanTangChuKy: 168,
-    loaiMai: 'mai_nong',
-    thoiGianChoMaiNguoiHours: 0,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 21,
-    name: '500x500mm Ceramic Bóng',
-    size: '500x500mm',
-    type: 'ceramic',
-    workshopId: '2',
-    productionLineId: '6',
-    chuKyKhoan: 32,
-    sanLuongRaLoPerDay: 11046,
-    sanLuongChinhPhamPerDay: 10660,
-    soNgayTruKhoan: 1.5,
-    sanLuongKhoan30Ngay: 303800,
-    sanLuongKhoan31Ngay: 314500,
-    congKhoanGiamChuKy: 172,
-    giamKhoanTangChuKy: 258,
-    loaiMai: 'mai_nong',
-    thoiGianChoMaiNguoiHours: 0,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 22,
-    name: '500x500mm Ceramic Sân vườn',
-    size: '500x500mm',
-    type: 'ceramic',
-    workshopId: '2',
-    productionLineId: '6',
-    chuKyKhoan: 32,
-    sanLuongRaLoPerDay: 11046,
-    sanLuongChinhPhamPerDay: 10660,
-    soNgayTruKhoan: 1.5,
-    sanLuongKhoan30Ngay: 303800,
-    sanLuongKhoan31Ngay: 314500,
-    congKhoanGiamChuKy: 172,
-    giamKhoanTangChuKy: 258,
-    loaiMai: 'mai_nong',
-    thoiGianChoMaiNguoiHours: 0,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 23,
-    name: '500x500mm Kimsa dày 11,5mm',
-    size: '500x500mm',
-    type: 'kimsa',
-    workshopId: '2',
-    productionLineId: '6',
-    chuKyKhoan: 47,
-    sanLuongRaLoPerDay: 7185,
-    sanLuongChinhPhamPerDay: 6900,
-    soNgayTruKhoan: 1.5,
-    sanLuongKhoan30Ngay: 196700,
-    sanLuongKhoan31Ngay: 203600,
-    congKhoanGiamChuKy: 75,
-    giamKhoanTangChuKy: 112,
-    loaiMai: 'mai_nong',
-    thoiGianChoMaiNguoiHours: 0,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 24,
-    name: '500x500mm Kimsa dày 9,5mm',
-    size: '500x500mm',
-    type: 'kimsa',
-    workshopId: '2',
-    productionLineId: '6',
-    chuKyKhoan: 37,
-    sanLuongRaLoPerDay: 9127,
-    sanLuongChinhPhamPerDay: 8760,
-    soNgayTruKhoan: 1.5,
-    sanLuongKhoan30Ngay: 249700,
-    sanLuongKhoan31Ngay: 258400,
-    congKhoanGiamChuKy: 122,
-    giamKhoanTangChuKy: 183,
-    loaiMai: 'mai_nong',
-    thoiGianChoMaiNguoiHours: 0,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 25,
-    name: '500x500mm Kimsa Semi Suger',
-    size: '500x500mm',
-    type: 'kimsa',
-    workshopId: '2',
-    productionLineId: '6',
-    chuKyKhoan: 37,
-    sanLuongRaLoPerDay: 9378,
-    sanLuongChinhPhamPerDay: 9000,
-    soNgayTruKhoan: 1.5,
-    sanLuongKhoan30Ngay: 256500,
-    sanLuongKhoan31Ngay: 265500,
-    congKhoanGiamChuKy: 125,
-    giamKhoanTangChuKy: 188,
-    loaiMai: 'mai_nong',
-    thoiGianChoMaiNguoiHours: 0,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 26,
-    name: '400x600mm Kimsa dày 11,5mm',
-    size: '400x600mm',
-    type: 'kimsa',
-    workshopId: '2',
-    productionLineId: '6',
-    chuKyKhoan: 48,
-    sanLuongRaLoPerDay: 7056,
-    sanLuongChinhPhamPerDay: 6770,
-    soNgayTruKhoan: 1.5,
-    sanLuongKhoan30Ngay: 192900,
-    sanLuongKhoan31Ngay: 199700,
-    congKhoanGiamChuKy: 72,
-    giamKhoanTangChuKy: 108,
-    loaiMai: 'mai_nong',
-    thoiGianChoMaiNguoiHours: 0,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 27,
-    name: '400x600mm Kimsa dày 9,5mm',
-    size: '400x600mm',
-    type: 'kimsa',
-    workshopId: '2',
-    productionLineId: '6',
-    chuKyKhoan: 40,
-    sanLuongRaLoPerDay: 8468,
-    sanLuongChinhPhamPerDay: 8130,
-    soNgayTruKhoan: 1.5,
-    sanLuongKhoan30Ngay: 231700,
-    sanLuongKhoan31Ngay: 239800,
-    congKhoanGiamChuKy: 104,
-    giamKhoanTangChuKy: 156,
-    loaiMai: 'mai_nong',
-    thoiGianChoMaiNguoiHours: 0,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  },
-  {
-    id: 28,
-    name: '400x400mm Kimsa Semi Matt',
-    size: '400x400mm',
-    type: 'kimsa',
-    workshopId: '2',
-    productionLineId: '6',
-    chuKyKhoan: 40,
-    sanLuongRaLoPerDay: 8519,
-    sanLuongChinhPhamPerDay: 8180,
-    soNgayTruKhoan: 1.5,
-    sanLuongKhoan30Ngay: 233100,
-    sanLuongKhoan31Ngay: 241300,
-    congKhoanGiamChuKy: 86,
-    giamKhoanTangChuKy: 129,
-    loaiMai: 'mai_nong',
-    thoiGianChoMaiNguoiHours: 0,
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  }
-];
-
 async function main() {
-  console.log('⏳ Seeding RBAC for 3-table schema...');
+    console.log(' Seeding RBAC for 3-table schema...');
 
-  // ------------------------------------------------------
-  // 1. Seed Permissions
-  // ------------------------------------------------------
-  const permissionsData = Object.entries(PermissionCodes).map(([key, code]) => ({
-    code,
-    name: key.replace(/_/g, ' '),
-    description: '',
-  }));
-  for (const p of permissionsData) {
-    await prisma.permission.upsert({
-      where: { code: p.code },
-      update: {},
-      create: p,
-    });
-  }
-  console.log(`✓ Seeded ${permissionsData.length} permissions`);
+    // ------------------------------------------------------
+    // 1. Seed Permissions
+    // ------------------------------------------------------
+    const permissionsData = Object.entries(PermissionCodes).map(([key, code]) => ({
+        code,
+        name: key.replace(/_/g, ' '),
+        description: '',
+    }));
 
-  const allPermissions = await prisma.permission.findMany();
-  const permMap = Object.fromEntries(allPermissions.map((p) => [p.code, p]));
+    for (const p of permissionsData) {
+        await prisma.permission.upsert({
+            where: { code: p.code },
+            update: {},
+            create: p,
+        });
+    }
 
-  // ------------------------------------------------------
-  // 2. Seed Roles
-  // ------------------------------------------------------
-  const rolesData = [
-    { code: RoleCodes.SUPER_ADMIN, name: 'Super Admin', description: 'Full access' },
-    { code: RoleCodes.ADMIN, name: 'Admin', description: 'System administrator' },
-    { code: RoleCodes.PLANNER, name: 'Planner', description: 'Plan manager' },
-    { code: RoleCodes.LINE_MANAGER, name: 'Line Manager', description: 'Production manager' },
-    { code: RoleCodes.VIEWER, name: 'Viewer', description: 'Read-only user' },
-  ];
-  for (const r of rolesData) {
-    await prisma.role.upsert({
-      where: { code: r.code },
-      update: {},
-      create: r,
-    });
-  }
-  console.log(`✓ Seeded ${rolesData.length} roles`);
+    console.log(` Seeded ${permissionsData.length} permissions`);
 
-  // Helper
-  async function assignPermissions(roleCode: string, permCodes: string[]) {
-    await prisma.role.update({
-      where: { code: roleCode },
-      data: {
-        permissions: {
-          connect: permCodes.map((c) => ({ code: c })),
+    const allPermissions = await prisma.permission.findMany();
+    const permMap = Object.fromEntries(allPermissions.map((p) => [p.code, p]));
+
+    // ------------------------------------------------------
+    // 2. Seed Roles
+    // ------------------------------------------------------
+    const rolesData = [
+        { code: RoleCodes.SUPER_ADMIN, name: 'Super Admin', description: 'Full access' },
+        { code: RoleCodes.ADMIN, name: 'Admin', description: 'System administrator' },
+        { code: RoleCodes.PLANNER, name: 'Planner', description: 'Plan manager' },
+        { code: RoleCodes.LINE_MANAGER, name: 'Line Manager', description: 'Production manager' },
+        { code: RoleCodes.VIEWER, name: 'Viewer', description: 'Read-only user' },
+    ];
+
+    for (const r of rolesData) {
+        await prisma.role.upsert({
+            where: { code: r.code },
+            update: {},
+            create: r,
+        });
+    }
+
+    console.log(` Seeded ${rolesData.length} roles`);
+
+    // Helper
+    async function assignPermissions(roleCode: string, permCodes: string[]) {
+        await prisma.role.update({
+            where: { code: roleCode },
+            data: {
+                permissions: {
+                    connect: permCodes.map((c) => ({ code: c })),
+                },
+            },
+        });
+    }
+
+    const allCodes = Object.values(PermissionCodes);
+
+    // ------------------------------------------------------
+    // 3. Assign Permissions to Roles
+    // ------------------------------------------------------
+
+    // super_admin = full permissions
+    await assignPermissions(RoleCodes.SUPER_ADMIN, allCodes);
+
+    // admin
+    await assignPermissions(RoleCodes.ADMIN, [
+        PermissionCodes.USER_VIEW,
+        PermissionCodes.USER_CREATE,
+        PermissionCodes.USER_UPDATE,
+        PermissionCodes.USER_DELETE,
+        PermissionCodes.USER_ASSIGN_ROLE,
+
+        PermissionCodes.ROLE_VIEW,
+        PermissionCodes.ROLE_CREATE,
+        PermissionCodes.ROLE_UPDATE,
+        PermissionCodes.ROLE_DELETE,
+        PermissionCodes.ROLE_ASSIGN_PERMISSION,
+
+        PermissionCodes.BRICK_TYPE_VIEW,
+        PermissionCodes.BRICK_TYPE_CREATE,
+        PermissionCodes.BRICK_TYPE_UPDATE,
+        PermissionCodes.BRICK_TYPE_DELETE,
+
+        PermissionCodes.BRICK_QUOTA_VIEW,
+        PermissionCodes.BRICK_QUOTA_UPDATE,
+
+        PermissionCodes.REPORT_VIEW,
+        PermissionCodes.REPORT_EXPORT,
+    ]);
+
+    // planner
+    await assignPermissions(RoleCodes.PLANNER, [
+        PermissionCodes.PLAN_VIEW,
+        PermissionCodes.PLAN_CREATE,
+        PermissionCodes.PLAN_UPDATE,
+        PermissionCodes.PLAN_APPROVE,
+
+        PermissionCodes.BRICK_TYPE_VIEW,
+        PermissionCodes.BRICK_QUOTA_VIEW,
+
+        PermissionCodes.REPORT_VIEW,
+    ]);
+
+    // line manager
+    await assignPermissions(RoleCodes.LINE_MANAGER, [
+        PermissionCodes.PLAN_VIEW,
+        PermissionCodes.PAYROLL_VIEW,
+        PermissionCodes.PAYROLL_CALCULATE,
+    ]);
+
+    // viewer
+    await assignPermissions(RoleCodes.VIEWER, [
+        PermissionCodes.PLAN_VIEW,
+        PermissionCodes.REPORT_VIEW,
+    ]);
+
+    console.log(' Permissions assigned to roles');
+
+    // ------------------------------------------------------
+    // 4. Seed Users (5 users, each with 1 role)
+    // ------------------------------------------------------
+
+    const PASSWORD = '123456';
+    const hashed = await bcrypt.hash(PASSWORD, 10);
+
+    const users = [
+        { username: 'super', email: 'super@demo.com', fullName: 'Super Admin', role: RoleCodes.SUPER_ADMIN },
+        { username: 'admin', email: 'admin@demo.com', fullName: 'Administrator', role: RoleCodes.ADMIN },
+        { username: 'planner', email: 'planner@demo.com', fullName: 'Planner User', role: RoleCodes.PLANNER },
+        { username: 'manager', email: 'manager@demo.com', fullName: 'Line Manager', role: RoleCodes.LINE_MANAGER },
+        { username: 'viewer', email: 'viewer@demo.com', fullName: 'Viewer User', role: RoleCodes.VIEWER },
+    ];
+
+    for (const u of users) {
+        const created = await prisma.user.upsert({
+            where: { username: u.username },
+            update: {},
+            create: {
+                username: u.username,
+                email: u.email,
+                fullName: u.fullName,
+                passwordHash: hashed,
+                isActive: true,
+            },
+        });
+
+        // GA n role cho user (implicit M2M)
+        await prisma.user.update({
+            where: { id: created.id },
+            data: {
+                roles: {
+                    connect: { code: u.role },
+                },
+            },
+        });
+    }
+
+    // ------------------------------------------------------
+    // 5. Seed Workshop
+    // ------------------------------------------------------
+    const workshop = await prisma.workshop.upsert({
+        where: { code: 'PX1' },
+        update: {},
+        create: {
+            code: 'PX1',
+            name: 'Phân xưởng 1',
         },
-      },
     });
-  }
 
-  const allCodes = Object.values(PermissionCodes);
-
-  // ------------------------------------------------------
-  // 3. Assign Permissions to Roles
-  // ------------------------------------------------------
-  // super_admin = full permissions
-  await assignPermissions(RoleCodes.SUPER_ADMIN, allCodes);
-
-  // admin
-  await assignPermissions(RoleCodes.ADMIN, [
-    PermissionCodes.USER_VIEW,
-    PermissionCodes.USER_CREATE,
-    PermissionCodes.USER_UPDATE,
-    PermissionCodes.USER_DELETE,
-    PermissionCodes.USER_ASSIGN_ROLE,
-    PermissionCodes.ROLE_VIEW,
-    PermissionCodes.ROLE_CREATE,
-    PermissionCodes.ROLE_UPDATE,
-    PermissionCodes.ROLE_DELETE,
-    PermissionCodes.ROLE_ASSIGN_PERMISSION,
-    PermissionCodes.BRICK_TYPE_VIEW,
-    PermissionCodes.BRICK_TYPE_CREATE,
-    PermissionCodes.BRICK_TYPE_UPDATE,
-    PermissionCodes.BRICK_TYPE_DELETE,
-    PermissionCodes.BRICK_QUOTA_VIEW,
-    PermissionCodes.BRICK_QUOTA_UPDATE,
-    PermissionCodes.REPORT_VIEW,
-    PermissionCodes.REPORT_EXPORT,
-  ]);
-
-  // planner
-  await assignPermissions(RoleCodes.PLANNER, [
-    PermissionCodes.PLAN_VIEW,
-    PermissionCodes.PLAN_CREATE,
-    PermissionCodes.PLAN_UPDATE,
-    PermissionCodes.PLAN_APPROVE,
-    PermissionCodes.BRICK_TYPE_VIEW,
-    PermissionCodes.BRICK_QUOTA_VIEW,
-    PermissionCodes.REPORT_VIEW,
-  ]);
-
-  // line manager
-  await assignPermissions(RoleCodes.LINE_MANAGER, [
-    PermissionCodes.PLAN_VIEW,
-    PermissionCodes.PAYROLL_VIEW,
-    PermissionCodes.PAYROLL_CALCULATE,
-  ]);
-
-  // viewer
-  await assignPermissions(RoleCodes.VIEWER, [
-    PermissionCodes.PLAN_VIEW,
-    PermissionCodes.REPORT_VIEW,
-  ]);
-
-  console.log('✓ Permissions assigned to roles');
-
-  // ------------------------------------------------------
-  // 4. Seed Users (5 users, each with 1 role)
-  // ------------------------------------------------------
-  const PASSWORD = '123456';
-  const hashed = await bcrypt.hash(PASSWORD, 10);
-
-  const users = [
-    { username: 'super', email: 'super@demo.com', fullName: 'Super Admin', role: RoleCodes.SUPER_ADMIN },
-    { username: 'admin', email: 'admin@demo.com', fullName: 'Administrator', role: RoleCodes.ADMIN },
-    { username: 'planner', email: 'planner@demo.com', fullName: 'Planner User', role: RoleCodes.PLANNER },
-    { username: 'manager', email: 'manager@demo.com', fullName: 'Line Manager', role: RoleCodes.LINE_MANAGER },
-    { username: 'viewer', email: 'viewer@demo.com', fullName: 'Viewer User', role: RoleCodes.VIEWER },
-  ];
-
-  for (const u of users) {
-    const created = await prisma.user.upsert({
-      where: { username: u.username },
-      update: {},
-      create: {
-        username: u.username,
-        email: u.email,
-        fullName: u.fullName,
-        passwordHash: hashed,
-        isActive: true,
-      },
-    });
-    // Gán role cho user (implicit M2M)
-    await prisma.user.update({
-      where: { id: created.id },
-      data: {
-        roles: {
-          connect: { code: u.role },
+    // ------------------------------------------------------
+    // 6. Seed Production Line
+    // ------------------------------------------------------
+    await prisma.productionLine.upsert({
+        where: { id: 1 },
+        update: {},
+        create: {
+            workshopId: workshop.id,
+            code: 'DC1',
+            name: 'Dây chuyền 1',
+            iotClusterId: 1,
         },
     });
 
@@ -753,79 +202,3 @@ main()
     })
     .finally(() => prisma.$disconnect());
 
-  }
-  console.log('✓ Seeded 5 users + assigned roles');
-
-  // ------------------------------------------------------
-  // 5. Seed BrickTypes
-  // ------------------------------------------------------
-  console.log('⏳ Seeding BrickTypes...');
-  for (const brickType of mockBrickTypes) {
-    // Extract size_x and size_y from the size string (e.g., "300x600mm" -> 300, 600)
-    let size_x: number | undefined = undefined;
-    let size_y: number | undefined = undefined;
-    if (brickType.size) {
-      const match = brickType.size.match(/(\d+)[xX](\d+)/);
-      if (match) {
-        size_x = parseInt(match[1], 10);
-        size_y = parseInt(match[2], 10);
-      }
-    }
-
-    // Generate a code from name and type
-    const code = `${brickType.size.replace(/mm/g, '').replace(/x/, 'X')}_${brickType.type.toUpperCase()}`;
-
-    await prisma.brickType.upsert({
-      where: { code },
-      update: {
-        name: brickType.name,
-        size_x: size_x ?? 0,
-        size_y: size_y ?? 0,
-        type: brickType.type,
-        loaiMai: brickType.loaiMai as any,
-        thoiGianChoMaiNguoiHours: brickType.thoiGianChoMaiNguoiHours,
-        workshopId: brickType.workshopId,
-        productionLineId: brickType.productionLineId,
-        chuKyKhoan: brickType.chuKyKhoan,
-        sanLuongRaLoPerDay: brickType.sanLuongRaLoPerDay,
-        sanLuongChinhPhamPerDay: brickType.sanLuongChinhPhamPerDay,
-        soNgayTruKhoan: brickType.soNgayTruKhoan,
-        sanLuongKhoan30Ngay: brickType.sanLuongKhoan30Ngay,
-        sanLuongKhoan31Ngay: brickType.sanLuongKhoan31Ngay,
-        congKhoanGiamChuKy: brickType.congKhoanGiamChuKy,
-        giamKhoanTangChuKy: brickType.giamKhoanTangChuKy,
-        isActive: false,
-      },
-      create: {
-        code,
-        name: brickType.name,
-        size_x: size_x ?? 0,
-        size_y: size_y ?? 0,
-        type: brickType.type,
-        loaiMai: brickType.loaiMai as any,
-        thoiGianChoMaiNguoiHours: brickType.thoiGianChoMaiNguoiHours,
-        workshopId: brickType.workshopId,
-        productionLineId: brickType.productionLineId,
-        chuKyKhoan: brickType.chuKyKhoan,
-        sanLuongRaLoPerDay: brickType.sanLuongRaLoPerDay,
-        sanLuongChinhPhamPerDay: brickType.sanLuongChinhPhamPerDay,
-        soNgayTruKhoan: brickType.soNgayTruKhoan,
-        sanLuongKhoan30Ngay: brickType.sanLuongKhoan30Ngay,
-        sanLuongKhoan31Ngay: brickType.sanLuongKhoan31Ngay,
-        congKhoanGiamChuKy: brickType.congKhoanGiamChuKy,
-        giamKhoanTangChuKy: brickType.giamKhoanTangChuKy,
-        isActive: false,
-      },
-    });
-  }
-  console.log(`✓ Seeded ${mockBrickTypes.length} brick types`);
-
-  console.log('🎉 SEED DONE');
-}
-
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(() => prisma.$disconnect());

@@ -18,7 +18,7 @@ export class ProductionBackendService {
     constructor(private readonly configService: ConfigService) {
         const envBase =
             this.configService.get<string>('PRODUCTION_BACKEND_BASE_URL') ??
-            this.configService.get<string>('BASE_API_URL') ??
+            this.configService.get<string>('IOT_API_URL') ??
             'http://localhost:5555';
 
         this.baseUrl = envBase.replace(/\/+$/, '') + '/api';
