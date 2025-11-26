@@ -740,8 +740,19 @@ async function main() {
         roles: {
           connect: { code: u.role },
         },
-      },
     });
+
+    console.log(' Seeded 5 users + assigned roles + default workshop/production line');
+    console.log(' SEED DONE');
+}
+
+main()
+    .catch((e) => {
+        console.error(e);
+        process.exit(1);
+    })
+    .finally(() => prisma.$disconnect());
+
   }
   console.log('✓ Seeded 5 users + assigned roles');
 

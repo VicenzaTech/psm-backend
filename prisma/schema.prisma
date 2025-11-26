@@ -1,185 +1,430 @@
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
 }
 
 enum LoaiMai {
-  mai_nong
-  mai_nguoi
+    mai_nong
+    mai_nguoi
 }
 
 model BrickType {
-  id     Int    @id @default(autoincrement())
-  /// "300x600_PORCELAIN"
-  code   String @unique @db.VarChar(100)
-  /// "300x600mm Porcelain mài bóng"
-  name   String @db.VarChar(200)
-  /// Kích thước hiển thị: "300x600mm"
-  size_x Int
-  size_y Int
+    id     Int    @id @default(autoincrement())
+    /// "300x600_PORCELAIN"
+    code   String @unique @db.VarChar(100)
+    /// "300x600mm Porcelain mài bóng"
+    name   String @db.VarChar(200)
+    /// Kích thước hiển thị: "300x600mm"
+    size_x Int
+    size_y Int
 
-  /// Loại gạch (porcelain, granite, ...)
-  type String
+    /// Loại gạch (porcelain, granite, ...)
+    type String
 
-  /// Loại mài: mài nóng / người / không mài
-  loaiMai LoaiMai
+    /// Loại mài: mài nóng / người / không mài
+    loaiMai LoaiMai
 
-  /// Thời gian chờ mài người (giờ), nếu có
-  thoiGianChoMaiNguoiHours Int?
+    /// Thời gian chờ mài người (giờ), nếu có
+    thoiGianChoMaiNguoiHours Int?
 
-  workshopId       String
-  /// (Optional) nếu sau này khoán theo dây chuyền
-  productionLineId String
+    workshopId       String
+    /// (Optional) nếu sau này khoán theo dây chuyền
+    productionLineId String
 
-  // Chu kỳ & Sản lượng khoán
-  chuKyKhoan              Int // phút
-  sanLuongRaLoPerDay      Decimal @db.Decimal(10, 2) // m²/ngày
-  sanLuongChinhPhamPerDay Decimal @db.Decimal(10, 2) // m²/ngày
+    // Chu kỳ & Sản lượng khoán
+    chuKyKhoan              Int // phút
+    sanLuongRaLoPerDay      Decimal @db.Decimal(10, 2) // m²/ngày
+    sanLuongChinhPhamPerDay Decimal @db.Decimal(10, 2) // m²/ngày
 
-  /// Số ngày trừ khoán (mặc định 1.5)
-  soNgayTruKhoan Decimal @default(1.5) @db.Decimal(5, 2)
+    /// Số ngày trừ khoán (mặc định 1.5)
+    soNgayTruKhoan Decimal @default(1.5) @db.Decimal(5, 2)
 
-  /// Khoán theo số ngày trong tháng
-  sanLuongKhoan30Ngay Decimal @db.Decimal(10, 2) // m²
-  sanLuongKhoan31Ngay Decimal @db.Decimal(10, 2) // m²
+    /// Khoán theo số ngày trong tháng
+    sanLuongKhoan30Ngay Decimal @db.Decimal(10, 2) // m²
+    sanLuongKhoan31Ngay Decimal @db.Decimal(10, 2) // m²
 
-  /// Điều chỉnh khoán khi giảm/tăng chu kỳ
-  congKhoanGiamChuKy Decimal @db.Decimal(10, 2) // m²/ngày
-  giamKhoanTangChuKy Decimal @db.Decimal(10, 2) // m²/ngày
+    /// Điều chỉnh khoán khi giảm/tăng chu kỳ
+    congKhoanGiamChuKy Decimal @db.Decimal(10, 2) // m²/ngày
+    giamKhoanTangChuKy Decimal @db.Decimal(10, 2) // m²/ngày
 
-  isActive  Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+    isActive  Boolean  @default(false)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    stageAssignments StageAssignment[]
+    productionPlans  ProductionPlan[]
 }
 
 // ===============================
 // ENUM GỢI Ý
 // ===============================
 enum ActivityEntityType {
-  User
-  BrickType
-  ProductionPlan
-  StageAssignment
-  DailyStageProduction
-  QualityRecord
-  MeasurementCache
-  Workshop
-  ProductionLine
-  Device
-  DeviceCluster
-  Setting
-  Other
-  Attachment
-  ApiToken
-  MeasurementType
-  SalaryPeriod
+    User
+    BrickType
+    ProductionPlan
+    StageAssignment
+    DailyStageProduction
+    QualityRecord
+    MeasurementCache
+    Workshop
+    ProductionLine
+    Device
+    DeviceCluster
+    Setting
+    Other
+    Attachment
+    ApiToken
+    MeasurementType
+    SalaryPeriod
 }
 
 enum ActivityStatus {
-  SUCCESS
-  FAILED
+    SUCCESS
+    FAILED
 }
 
 enum ActivitySeverity {
-  INFO
-  WARNING
-  ERROR
-  SECURITY // hành động nhạy cảm: phân quyền, đổi mật khẩu, v.v.
+    INFO
+    WARNING
+    ERROR
+    SECURITY // hành động nhạy cảm: phân quyền, đổi mật khẩu, v.v.
 }
 
 enum ActivitySource {
-  WEB_ADMIN
-  WEB_APP
-  API
-  IOT_SYNC
-  JOB      // cron / background job
-  SYSTEM   // hành động hệ thống tự làm
+    WEB_ADMIN
+    WEB_APP
+    API
+    IOT_SYNC
+    JOB // cron / background job
+    SYSTEM // hành động hệ thống tự làm
 }
+
 // ===============================
 // ACTIVITY LOG
 // ===============================
 model ActivityLog {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+    id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
 
-  // WHO: cho phép null để log cả action "system"
-  userId       Int?    @map("user_id")
-  // WHAT
-  action     String              @db.VarChar(80)      // mã hành động cụ thể: "UPDATE_BRICK_TYPE", "RUN_SALARY_JOB"
-  actionType String              @map("action_type")  // nhóm hành động
-  // ON WHICH ENTITY
-  entityType ActivityEntityType? @map("entity_type")
-  entityId   Int?                @map("entity_id")
-  entityName String?             @map("entity_name") @db.VarChar(200)
-  // RESULT + CONTEXT
-  status   ActivityStatus   // SUCCESS / FAILED
-  severity ActivitySeverity // INFO / WARNING / ERROR / SECURITY
-  source   ActivitySource   // WEB_ADMIN / API / IOT_SYNC / JOB / SYSTEM
-  metadata Json?            // JSON nhẹ: { before, after, extraCodes }
-  // EXTRA INFO
-  description String? @db.Text
-  createdAt DateTime @default(now()) @map("created_at")
-  user User? @relation(fields: [userId], references: [id])
-  @@index([userId, createdAt])
-  @@index([entityType, entityId, createdAt])
-  @@index([actionType, createdAt])
-  @@index([source, createdAt])
-  @@index([createdAt])
-  @@map("activity_logs")
+    // WHO: cho phép null để log cả action "system"
+    userId      Int?                @map("user_id")
+    // WHAT
+    action      String              @db.VarChar(80) // mã hành động cụ thể: "UPDATE_BRICK_TYPE", "RUN_SALARY_JOB"
+    actionType  String              @map("action_type") // nhóm hành động
+    // ON WHICH ENTITY
+    entityType  ActivityEntityType? @map("entity_type")
+    entityId    Int?                @map("entity_id")
+    entityName  String?             @map("entity_name") @db.VarChar(200)
+    // RESULT + CONTEXT
+    status      ActivityStatus // SUCCESS / FAILED
+    severity    ActivitySeverity // INFO / WARNING / ERROR / SECURITY
+    source      ActivitySource // WEB_ADMIN / API / IOT_SYNC / JOB / SYSTEM
+    metadata    Json? // JSON nhẹ: { before, after, extraCodes }
+    // EXTRA INFO
+    description String?             @db.Text
+    createdAt   DateTime            @default(now()) @map("created_at")
+    user        User?               @relation(fields: [userId], references: [id])
+
+    @@index([userId, createdAt])
+    @@index([entityType, entityId, createdAt])
+    @@index([actionType, createdAt])
+    @@index([source, createdAt])
+    @@index([createdAt])
+    @@map("activity_logs")
 }
 
-
 model User {
-  id           Int      @id @default(autoincrement())
-  username     String   @unique @db.VarChar(50)
-  email        String   @unique @db.VarChar(150)
-  fullName     String   @map("full_name") @db.VarChar(150)
-  passwordHash String   @map("password_hash") @db.VarChar(255)
-  isActive     Boolean  @default(true) @map("is_active")
+    id           Int     @id @default(autoincrement())
+    username     String  @unique @db.VarChar(50)
+    email        String  @unique @db.VarChar(150)
+    fullName     String  @map("full_name") @db.VarChar(150)
+    passwordHash String  @map("password_hash") @db.VarChar(255)
+    isActive     Boolean @default(true) @map("is_active")
 
-  lastLoginAt  DateTime? @map("last_login_at")
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt      @map("updated_at")
+    lastLoginAt DateTime? @map("last_login_at")
+    createdAt   DateTime  @default(now()) @map("created_at")
+    updatedAt   DateTime  @updatedAt @map("updated_at")
 
-  roles        Role[]      @relation("UserRoles")
+    roles Role[] @relation("UserRoles")
 
-  activityLogs ActivityLog[]
+    activityLogs ActivityLog[]
 
-  @@index([isActive])
-  @@index([username])
-  @@map("users")
+    @@index([isActive])
+    @@index([username])
+    @@map("users")
 }
 
 model Role {
-  id          Int      @id @default(autoincrement())
-  code        String   @unique @db.VarChar(50)   // super_admin, admin, ...
-  name        String   @db.VarChar(100)
-  description String?  @db.VarChar(255)
-  isActive    Boolean  @default(true) @map("is_active")
+    id          Int     @id @default(autoincrement())
+    code        String  @unique @db.VarChar(50) // super_admin, admin, ...
+    name        String  @db.VarChar(100)
+    description String? @db.VarChar(255)
+    isActive    Boolean @default(true) @map("is_active")
 
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt      @map("updated_at")
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
 
-  users       User[]        @relation("UserRoles")
-  permissions Permission[]  @relation("RolePermissions")
+    users       User[]       @relation("UserRoles")
+    permissions Permission[] @relation("RolePermissions")
 
-  @@index([isActive])
-  @@map("roles")
+    @@index([isActive])
+    @@map("roles")
 }
 
 model Permission {
-  id          Int      @id @default(autoincrement())
-  code        String   @unique @db.VarChar(100) // "user.view", ...
-  name        String   @db.VarChar(150)
-  description String?  @db.VarChar(255)
+    id          Int     @id @default(autoincrement())
+    code        String  @unique @db.VarChar(100) // "user.view", ...
+    name        String  @db.VarChar(150)
+    description String? @db.VarChar(255)
 
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt      @map("updated_at")
+    createdAt DateTime @default(now()) @map("created_at")
+    updatedAt DateTime @updatedAt @map("updated_at")
 
-  roles       Role[] @relation("RolePermissions")
+    roles Role[] @relation("RolePermissions")
 
-  @@map("permissions")
+    @@map("permissions")
+}
+
+// ======================================================================
+// ENUMS
+// ======================================================================
+
+enum Shift {
+    A
+    B
+    C
+}
+
+enum DataSource {
+    auto_sync
+    manual_input
+    adjusted
+}
+
+// ======================================================================
+// WORKSHOPS
+// ======================================================================
+
+model Workshop {
+    id       Int     @id @default(autoincrement())
+    code     String  @unique @db.VarChar(50)
+    name     String  @db.VarChar(100)
+    isActive Boolean @default(true) @map("is_active")
+
+    productionLines ProductionLine[]
+
+    @@map("workshops")
+}
+
+// ======================================================================
+// PRODUCTION LINES
+// ======================================================================
+
+model ProductionLine {
+    id           Int     @id @default(autoincrement())
+    workshopId   Int     @map("workshop_id")
+    code         String  @db.VarChar(50)
+    name         String  @db.VarChar(100)
+    iotClusterId Int     @map("iot_cluster_id")
+    isActive     Boolean @default(true) @map("is_active")
+
+    workshop         Workshop             @relation(fields: [workshopId], references: [id])
+    deviceMappings   StageDeviceMapping[]
+    stageAssignments StageAssignment[]
+    productionPlans  ProductionPlan[]
+
+    @@index([workshopId])
+    @@index([code])
+    @@map("production_lines")
+}
+
+// ======================================================================
+// STAGE_DEVICE_MAPPINGS
+// ======================================================================
+
+enum Stage {
+    EP
+    NUNG
+    MAI
+    DONG_HOP
+    NUNG_MEN
+    NUNG_SUONG
+}
+
+enum StageStatus {
+    RUNNING
+    WAITING
+    ERROR
+    STOPPED
+}
+
+
+model StageDeviceMapping {
+    id                   Int            @id @default(autoincrement())
+    productionLineId     Int            @map("production_line_id")
+    stage                Stage
+    stageLiveStatus      StageStatus    @default(WAITING)
+    measurementPosition  Int?           @map("measurement_position")
+    iotDeviceId          String?        @map("iot_device_id") @db.VarChar(100)
+    iotMeasurementTypeId Int            @map("iot_measurement_type_id")
+    isActive             Boolean        @default(true) @map("is_active")
+    productionLine       ProductionLine @relation(fields: [productionLineId], references: [id])
+
+    @@index([productionLineId, stage])
+    @@index([iotDeviceId])
+    @@map("stage_device_mappings")
+}
+
+// ======================================================================
+// PRODUCTION_PLANS
+// ======================================================================
+
+enum PlanStatus {
+    DRAFT
+    APPROVED
+    IN_PROGRESS
+    COMPLETED
+    CANCELLED
+}
+
+model ProductionPlan {
+    id                   Int        @id @default(autoincrement())
+    planCode             String     @unique @map("plan_code") @db.VarChar(100)
+    productionLineId     Int        @map("production_line_id")
+    brickTypeId          Int        @map("brick_type_id")
+    startDate            DateTime   @map("start_date") @db.Date
+    endDate              DateTime   @map("end_date") @db.Date
+    targetQuantity       Decimal    @map("target_quantity") @db.Decimal(10, 2)
+    actualQuantity       Decimal    @default("0") @map("actual_quantity") @db.Decimal(10, 2)
+    completionPercentage Decimal    @default("0") @map("completion_percentage") @db.Decimal(5, 2)
+    status               PlanStatus @default(DRAFT)
+    notes                String?    @db.Text
+    customer             String?    @db.VarChar(256)
+    createdBy            String     @map("created_by") @db.VarChar(100)
+    approvedBy           String?    @map("approved_by") @db.VarChar(100)
+    approvedAt           DateTime?  @map("approved_at") @db.Timestamptz(6)
+    createdAt            DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+    updatedAt            DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+    productionLine   ProductionLine    @relation(fields: [productionLineId], references: [id])
+    brickType        BrickType         @relation(fields: [brickTypeId], references: [id])
+    stageAssignments StageAssignment[]
+    qualityRecords   QualityRecord[]
+
+    @@index([productionLineId, startDate, endDate])
+    @@index([status])
+    @@map("production_plans")
+}
+
+// ======================================================================
+// STAGE_ASSIGNMENTS
+// ======================================================================
+
+model StageAssignment {
+    id               Int       @id @default(autoincrement())
+    productionLineId Int       @map("production_line_id")
+    productionPlanId Int       @map("production_plan_id")
+    brickTypeId      Int       @map("brick_type_id")
+    stage            Stage
+    status           StageStatus @default(WAITING) @map("status")
+    isActive         Boolean   @default(true) @map("is_active")
+    startTime        DateTime  @default(now()) @map("start_time") @db.Timestamptz(6)
+    endTime          DateTime? @map("end_time") @db.Timestamptz(6)
+    actualQuantity   Decimal   @default("0") @map("actual_quantity") @db.Decimal(10, 2)
+    targetQuantity   Decimal?  @map("target_quantity") @db.Decimal(10, 2)
+    notes            String?   @db.Text
+    createdBy        String    @map("created_by") @db.VarChar(100)
+    createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+    updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+    productionLine   ProductionLine         @relation(fields: [productionLineId], references: [id])
+    productionPlan   ProductionPlan         @relation(fields: [productionPlanId], references: [id])
+    brickType        BrickType              @relation(fields: [brickTypeId], references: [id])
+    dailyProductions DailyStageProduction[]
+    measurementCache MeasurementCache[]
+    qualityRecords   QualityRecord[]
+
+    @@index([productionLineId, stage, isActive])
+    @@index([productionPlanId, stage])
+    @@index([isActive, startTime])
+    @@map("stage_assignments")
+}
+
+// ======================================================================
+// DAILY_STAGE_PRODUCTIONS
+// ======================================================================
+
+model DailyStageProduction {
+    id                Int        @id @default(autoincrement())
+    stageAssignmentId Int        @map("stage_assignment_id")
+    productionDate    DateTime   @map("production_date") @db.Date
+    shift             Shift?
+    actualQuantity    Decimal    @default("0") @map("actual_quantity") @db.Decimal(10, 2)
+    wasteQuantity     Decimal    @default("0") @map("waste_quantity") @db.Decimal(10, 2)
+    dataSource        DataSource @default(auto_sync) @map("data_source")
+    recordedBy        String?    @map("recorded_by") @db.VarChar(100)
+    notes             String?    @db.Text
+    createdAt         DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+    updatedAt         DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+    stageAssignment StageAssignment @relation(fields: [stageAssignmentId], references: [id])
+
+    // Tối ưu: tránh trùng record theo (assignment, ngày, ca)
+    @@unique([stageAssignmentId, productionDate, shift])
+    @@index([stageAssignmentId, productionDate])
+    @@index([productionDate])
+    @@map("daily_stage_productions")
+}
+
+// ======================================================================
+// QUALITY_RECORDS
+// ======================================================================
+
+model QualityRecord {
+    id                Int      @id @default(autoincrement())
+    productionPlanId  Int      @map("production_plan_id")
+    stageAssignmentId Int?     @map("stage_assignment_id")
+    recordDate        DateTime @map("record_date") @db.Date
+    shift             Shift?
+    slA1              Decimal  @default("0") @map("sl_A1") @db.Decimal(10, 2)
+    slA2              Decimal  @default("0") @map("sl_A2") @db.Decimal(10, 2)
+    slCatLo           Decimal  @default("0") @map("sl_cat_lo") @db.Decimal(10, 2)
+    slPhe1            Decimal  @default("0") @map("sl_phe_1") @db.Decimal(10, 2)
+    slPhe2            Decimal  @default("0") @map("sl_phe_2") @db.Decimal(10, 2)
+    slPheHuy          Decimal  @default("0") @map("sl_phe_huy") @db.Decimal(10, 2)
+    recordedBy        String   @map("recorded_by") @db.VarChar(100)
+    createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+    updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+    productionPlan  ProductionPlan   @relation(fields: [productionPlanId], references: [id])
+    stageAssignment StageAssignment? @relation(fields: [stageAssignmentId], references: [id])
+
+    @@index([productionPlanId, recordDate])
+    @@index([recordDate])
+    @@map("quality_records")
+}
+
+// ======================================================================
+// MEASUREMENT_CACHE
+// ======================================================================
+
+model MeasurementCache {
+    id                String   @id @default(uuid()) @db.Uuid
+    stageAssignmentId Int?     @map("stage_assignment_id")
+    timestamp         DateTime @db.Timestamptz(6)
+    deviceId          Int      @map("device_id")
+    measurementTypeId Int      @map("measurement_type_id")
+    data              Json
+    syncedAt          DateTime @default(now()) @map("synced_at") @db.Timestamptz(6)
+
+    stageAssignment StageAssignment? @relation(fields: [stageAssignmentId], references: [id])
+
+    @@index([stageAssignmentId, timestamp])
+    @@index([deviceId, timestamp])
+    // Tối ưu thêm: query nhanh theo device + type + time
+    @@index([deviceId, measurementTypeId, timestamp])
+    @@map("measurement_cache")
 }

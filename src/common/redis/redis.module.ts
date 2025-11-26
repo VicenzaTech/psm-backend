@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
 import { REDIS_PROVIDER } from './redis.constant';
+import { CacheVersionService } from './cache-version.service';
 
 @Module({
   imports: [ConfigModule],
@@ -35,7 +36,8 @@ import { REDIS_PROVIDER } from './redis.constant';
       },
       inject: [ConfigService],
     },
+    CacheVersionService,
   ],
-  exports: [REDIS_PROVIDER],
+  exports: [REDIS_PROVIDER, CacheVersionService],
 })
 export class RedisModule {}

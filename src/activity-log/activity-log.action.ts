@@ -131,6 +131,3 @@ export type ActivityAction =
   // OTHER
   | 'MANUAL_DATA_FIX'
   | 'OTHER_ACTION';
-
-
-  
