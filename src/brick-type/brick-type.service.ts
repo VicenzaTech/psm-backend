@@ -5,32 +5,38 @@ import { UpdateBrickTypeDTO } from './dto/update-brick-type.dto';
 import { REDIS_PROVIDER } from '../common/redis/redis.constant';
 import Redis from 'ioredis';
 import { Prisma } from '@prisma/client';
-import { ActivityLogProviderService } from 'src/common/queue/activity-log.queue/activity-log.provider';
 import { ActivityEntityType } from 'src/activity-log/activity-log.enum';
 import { OkResponse } from 'src/common/type/response.type';
+import { CacheVersionService } from 'src/common/redis/cache-version.service';
+
 @Injectable()
 export class BrickTypeService {
     private readonly logger = new Logger(BrickTypeService.name);
-    private readonly allCacheKey = 'brick_types:all';
+    private readonly allCacheScope = 'brick_types:all';
 
     constructor(
         private readonly prisma: PrismaService,
         @Inject(REDIS_PROVIDER) private readonly redis: Redis,
-        private readonly activityLogProviderService: ActivityLogProviderService,
+        private readonly cacheVersionService: CacheVersionService,
     ) { }
 
     private getByIdKey(id: number): string {
         return `brick_type:${id}`;
     }
 
+    private async getAllCacheKey(): Promise<string> {
+        const version = await this.cacheVersionService.getVersion(this.allCacheScope);
+        return `${this.allCacheScope}:v${version}`;
+    }
+
     private async invalidateCache(id?: number): Promise<void> {
         try {
-            await this.redis.del(this.allCacheKey);
+            await this.cacheVersionService.bumpVersion(this.allCacheScope);
             if (id != null) {
                 await this.redis.del(this.getByIdKey(id));
             }
         } catch (error) {
-            this.logger.error(`Failed to invalidate brick type cache`, error.stack);
+            this.logger.error(`Failed to invalidate brick type cache`, (error as any)?.stack);
         }
     }
 
@@ -74,14 +80,16 @@ export class BrickTypeService {
 
         const noFilter = !workshopId && !type && isActive === true;
 
+        let cacheKey: string | null = null;
         if (noFilter) {
             try {
-                const cached = await this.redis.get(this.allCacheKey);
+                cacheKey = await this.getAllCacheKey();
+                const cached = await this.redis.get(cacheKey);
                 if (cached) {
                     return JSON.parse(cached);
                 }
             } catch (error) {
-                this.logger.error(`Failed to read brick types from cache`, error.stack);
+                this.logger.error(`Failed to read brick types from cache`, (error as any)?.stack);
             }
         }
 
@@ -104,11 +112,11 @@ export class BrickTypeService {
             orderBy: { createdAt: 'desc' },
         });
 
-        if (noFilter) {
+        if (noFilter && cacheKey) {
             try {
-                await this.redis.set(this.allCacheKey, JSON.stringify(result), 'EX', 60);
+                await this.redis.set(cacheKey, JSON.stringify(result), 'EX', 60);
             } catch (error) {
-                this.logger.error(`Failed to write brick types to cache`, error.stack);
+                this.logger.error(`Failed to write brick types to cache`, (error as any)?.stack);
             }
         }
 
@@ -119,14 +127,16 @@ export class BrickTypeService {
         const { workshopId, type } = params || {};
         const noFilter = !workshopId && !type;
 
+        let cacheKey: string | null = null;
         if (noFilter) {
             try {
-                const cached = await this.redis.get(this.allCacheKey);
+                cacheKey = await this.getAllCacheKey();
+                const cached = await this.redis.get(cacheKey);
                 if (cached) {
                     return JSON.parse(cached);
                 }
             } catch (error) {
-                this.logger.error(`Failed to read brick types from cache`, error.stack);
+                this.logger.error(`Failed to read brick types from cache`, (error as any)?.stack);
             }
         }
 
@@ -146,11 +156,11 @@ export class BrickTypeService {
             orderBy: { createdAt: 'desc' },
         });
 
-        if (noFilter) {
+        if (noFilter && cacheKey) {
             try {
-                await this.redis.set(this.allCacheKey, JSON.stringify(result), 'EX', 60);
+                await this.redis.set(cacheKey, JSON.stringify(result), 'EX', 60);
             } catch (error) {
-                this.logger.error(`Failed to write brick types to cache`, error.stack);
+                this.logger.error(`Failed to write brick types to cache`, (error as any)?.stack);
             }
         }
         return result;
@@ -200,7 +210,7 @@ export class BrickTypeService {
             log: {
                 entityType: ActivityEntityType.BrickType,
                 action: "UPDATE_BRICK_TYPE",
-                description: `${updated.name} đã bị xóa`,
+                description: `${updated.name} đã được cập nhật`,
                 actionType: "UPDATE_BRICK_TYPE",
             }
         } as OkResponse
@@ -226,14 +236,15 @@ export class BrickTypeService {
         } as OkResponse
     }
 
-    private async ensureExists(id: number): Promise<void> {
+    async ensureExists(id: number) {
         const existing = await this.prisma.brickType.findUnique({
             where: { id },
-            select: { id: true },
+            select: { id: true, isActive: true },
         });
 
         if (!existing) {
             throw new NotFoundException(`Brick type with id ${id} not found`);
         }
+        return existing
     }
 }

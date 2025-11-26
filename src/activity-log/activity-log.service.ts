@@ -2,8 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { PaginationDTO } from 'src/common/type/pagination.type';
 import { LogDTO } from './dto/log.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { ActivityEntityType } from './activity-log.enum';
-import { ActivityAction } from './activity-log.action'
+import { ActivityEntityType, ActivityStatus } from './activity-log.enum';
 @Injectable()
 export class ActivityLogService {
     constructor(
@@ -27,9 +26,6 @@ export class ActivityLogService {
         } = dto
 
         const where: any = {}
-        if (!Object.values(ActivityEntityType).includes(entityType as any)) {
-            throw new BadRequestException('Loại thông báo không phù hợp');
-        }
      
         if (actionType) {
             where.actionType = actionType
