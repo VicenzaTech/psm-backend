@@ -31,12 +31,18 @@ async function bootstrap() {
     );
 
     app.useGlobalInterceptors(new ResponseFormatInterceptor(activityLogProviderService))
+    app.enableCors([
+        "http://localhost:3002"
+    ])
     // Use middleware
     app.use(compression());
     app.use(cookieParser());
     // Initial Logger
     app.useLogger(new ApplicationLogger());
 
-    await app.listen(6667);
+    // Initial Validation Pipe
+
+    // Interceptor
+    await app.listen(3000);
 }
 bootstrap();

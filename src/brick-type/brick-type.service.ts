@@ -75,10 +75,10 @@ export class BrickTypeService {
         }
     }
 
-    async findAll(params?: { workshopId?: string; type?: string; isActive?: boolean }) {
-        const { workshopId, type, isActive = true } = params || {};
+    async findAll(params?: { workshopId?: string; type?: string }) {
+        const { workshopId, type } = params || {};
 
-        const noFilter = !workshopId && !type && isActive === true;
+        const noFilter = !workshopId && !type;
 
         let cacheKey: string | null = null;
         if (noFilter) {
@@ -101,10 +101,6 @@ export class BrickTypeService {
 
         if (type) {
             where.type = type;
-        }
-
-        if (typeof isActive === 'boolean') {
-            where.isActive = isActive;
         }
 
         const result = await this.prisma.brickType.findMany({

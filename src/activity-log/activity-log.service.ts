@@ -3,6 +3,7 @@ import { PaginationDTO } from 'src/common/type/pagination.type';
 import { LogDTO } from './dto/log.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ActivityEntityType, ActivityStatus } from './activity-log.enum';
+import { ActivityAction } from './activity-log.action'
 @Injectable()
 export class ActivityLogService {
     constructor(
@@ -26,7 +27,6 @@ export class ActivityLogService {
         } = dto
 
         const where: any = {}
-     
         if (actionType) {
             where.actionType = actionType
         }
