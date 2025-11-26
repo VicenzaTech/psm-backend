@@ -105,7 +105,6 @@ export class StageAssignmentService {
         });
 
         return {
-            status: 'ok',
             data: created,
             log: {
                 entityType: ActivityEntityType.StageAssignment,
@@ -155,13 +154,16 @@ export class StageAssignmentService {
         await this.recomputePlanStatusForPlan(updated.productionPlanId);
 
         return {
-            status: 'ok',
             data: updated,
             log: {
                 entityType: ActivityEntityType.StageAssignment,
                 action: 'UPDATE_STAGE_ASSIGNMENT',
                 actionType: 'UPDATE_STAGE_ASSIGNMENT',
                 description: `Đã cập nhật phân công công đoạn ${updated.stage} (id: ${updated.id})`,
+                meta: {
+                    before: JSON.stringify(existing),
+                    after: JSON.stringify(updated)
+                }
             },
         } as OkResponse;
     }
@@ -171,7 +173,6 @@ export class StageAssignmentService {
 
         if (!existing.isActive) {
             return {
-                status: 'ok',
                 data: existing,
                 log: {
                     entityType: ActivityEntityType.StageAssignment,
@@ -190,13 +191,16 @@ export class StageAssignmentService {
         await this.recomputePlanStatusForPlan(updated.productionPlanId);
 
         return {
-            status: 'ok',
             data: updated,
             log: {
                 entityType: ActivityEntityType.StageAssignment,
                 action: 'STOP_STAGE_ASSIGNMENT',
                 actionType: 'STOP_STAGE_ASSIGNMENT',
                 description: `Đã dừng phân công công đoạn ${updated.stage} (id: ${updated.id})`,
+                meta: {
+                    before: existing.isActive ? "true" : "false",
+                    after: updated.isActive ? "true" : "false"
+                }
             },
         } as OkResponse;
     }

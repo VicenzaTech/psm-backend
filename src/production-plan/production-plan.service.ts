@@ -124,7 +124,6 @@ export class ProductionPlanService {
         await this.invalidateAllCache();
 
         return {
-            status: 'ok',
             data: created,
             log: {
                 entityType: ActivityEntityType.ProductionPlan,
@@ -180,13 +179,16 @@ export class ProductionPlanService {
         await this.invalidateAllCache();
 
         return {
-            status: 'ok',
             data: updated,
             log: {
                 entityType: ActivityEntityType.ProductionPlan,
                 action: 'UPDATE_PRODUCTION_PLAN',
                 actionType: 'UPDATE_PRODUCTION_PLAN',
                 description: `Đã cập nhật kế hoạch ${updated.planCode}`,
+                meta: {
+                    before: JSON.stringify(existing),
+                    after: JSON.stringify(updated)
+                }
             },
         } as OkResponse;
     }
@@ -205,18 +207,22 @@ export class ProductionPlanService {
                 approvedBy: username,
                 approvedAt: new Date(),
             },
+
         });
 
         await this.invalidateAllCache();
 
         return {
-            status: 'ok',
             data: updated,
             log: {
                 entityType: ActivityEntityType.ProductionPlan,
                 action: 'APPROVE_PRODUCTION_PLAN',
                 actionType: 'APPROVE_PRODUCTION_PLAN',
                 description: `Đã duyệt kế hoạch ${updated.planCode}`,
+                meta: {
+                    before: existing.status,
+                    after: updated.status
+                }
             },
         } as OkResponse;
     }
@@ -239,13 +245,16 @@ export class ProductionPlanService {
         await this.invalidateAllCache();
 
         return {
-            status: 'ok',
             data: updated,
             log: {
                 entityType: ActivityEntityType.ProductionPlan,
                 action: 'CANCEL_PRODUCTION_PLAN',
                 actionType: 'CANCEL_PRODUCTION_PLAN',
                 description: `Đã huỷ kế hoạch ${updated.planCode} bởi ${username}`,
+                meta: {
+                    before: existing.status,
+                    after: updated.status
+                }
             },
         } as OkResponse;
     }
@@ -267,13 +276,16 @@ export class ProductionPlanService {
         await this.invalidateAllCache();
 
         return {
-            status: 'ok',
             data: updated,
             log: {
                 entityType: ActivityEntityType.ProductionPlan,
                 action: 'UPDATE_PRODUCTION_PLAN',
                 actionType: 'UPDATE_PRODUCTION_PLAN',
                 description: `Đã chuyển kế hoạch ${updated.planCode} sang trạng thái IN_PROGRESS`,
+                meta: {
+                    before: existing.status,
+                    after: updated.status
+                }
             },
         } as OkResponse;
     }
@@ -297,13 +309,16 @@ export class ProductionPlanService {
         await this.invalidateAllCache();
 
         return {
-            status: 'ok',
             data: updated,
             log: {
                 entityType: ActivityEntityType.ProductionPlan,
                 action: 'CLOSE_PRODUCTION_PLAN',
                 actionType: 'CLOSE_PRODUCTION_PLAN',
                 description: `Đã hoàn thành kế hoạch ${updated.planCode}`,
+                meta: {
+                    before: existing.status,
+                    after: updated.status
+                }
             },
         } as OkResponse;
     }
@@ -330,13 +345,16 @@ export class ProductionPlanService {
         await this.invalidateAllCache();
 
         return {
-            status: 'ok',
             data: updated,
             log: {
                 entityType: ActivityEntityType.ProductionPlan,
                 action: 'CANCEL_PRODUCTION_PLAN',
                 actionType: 'CANCEL_PRODUCTION_PLAN',
                 description: `Đã huỷ kế hoạch ${updated.planCode}`,
+                meta: {
+                    before: existing.status,
+                    after: updated.status
+                }
             },
         } as OkResponse;
     }
@@ -355,7 +373,6 @@ export class ProductionPlanService {
         await this.invalidateAllCache();
 
         return {
-            status: 'ok',
             data: deleted,
             log: {
                 entityType: ActivityEntityType.ProductionPlan,
@@ -388,12 +405,6 @@ export class ProductionPlanService {
         const existing = await this.prisma.productionPlan.findUnique({
             where: {
                 id,
-            },
-            select: {
-                id: true,
-                planCode: true,
-                status: true,
-                notes: true
             },
         });
 

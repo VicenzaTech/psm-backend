@@ -43,6 +43,6 @@ async function bootstrap() {
     // Initial Validation Pipe
 
     // Interceptor
-    await app.listen(3000);
+    await app.listen(6667);
 }
 bootstrap();

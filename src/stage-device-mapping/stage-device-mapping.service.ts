@@ -132,7 +132,6 @@ export class StageDeviceMappingService {
         });
 
         return {
-            status: 'ok',
             data: created,
             log: {
                 action: 'CREATE_DEVICE',
@@ -258,13 +257,16 @@ export class StageDeviceMappingService {
         });
 
         return {
-            status: 'ok',
             data: updated,
             log: {
                 action: 'UPDATE_DEVICE',
                 actionType: 'UPDATE_DEVICE',
                 description: `Đã cập nhật mapping thiết bị ${updated.iotDeviceId}`,
                 entityType: ActivityEntityType.Device,
+                meta: {
+                    before: JSON.stringify(existing),
+                    after: JSON.stringify(updated)
+                }
             },
         } as OkResponse;
     }
@@ -282,7 +284,6 @@ export class StageDeviceMappingService {
         });
 
         return {
-            status: 'ok',
             data: updated,
             log: {
                 action: 'DISABLE_DEVICE',
@@ -295,7 +296,7 @@ export class StageDeviceMappingService {
 
     async updateStageStatus(id: number, dto: UpdateStageDevieMappingStatus) {
         const { stageStatus } = dto
-        await this.ensureDeviceMappingExist(id)
+        const foundStageDeviceMapping = await this.ensureDeviceMappingExist(id)
 
         const updated = await this.prisma.stageDeviceMapping.update({
             where: {
@@ -313,6 +314,10 @@ export class StageDeviceMappingService {
                 actionType: 'UPDATE_DEVICE',
                 description: `Đã đánh dấu thiết bị ${updated.iotDeviceId} có trạng thái: ${stageStatus}`,
                 entityType: ActivityEntityType.Device,
+                meta: {
+                    before: foundStageDeviceMapping.stageLiveStatus,
+                    after: updated.stageLiveStatus
+                }
             }
         } as OkResponse
     }
@@ -330,7 +335,6 @@ export class StageDeviceMappingService {
         });
 
         return {
-            status: 'ok',
             data: updated,
             log: {
                 action: 'DEVICE_RECOVERED',
