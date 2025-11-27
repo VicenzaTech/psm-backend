@@ -5,11 +5,11 @@ import { WorkerHost, Processor } from '@nestjs/bullmq';
 
 @Processor('activity-log-queue')
 export class ActivityLogConsumer extends WorkerHost {
-    constructor(private readonly activityLogService: ActivityLogService) {
-        super();
-    }
+  constructor(private readonly activityLogService: ActivityLogService) {
+    super();
+  }
 
-    async process(job: Job<LogDTO>): Promise<void> {
-        await this.activityLogService.log(job.data);
-    }
+  async process(job: Job<LogDTO>): Promise<void> {
+    await this.activityLogService.log(job.data);
+  }
 }

@@ -6,28 +6,28 @@ import { ActivityStatus } from 'src/activity-log/activity-log.enum';
 
 @Injectable()
 export class ActivityLogProviderService {
-    constructor(
-        @InjectQueue('activity-log-queue')
-        private readonly queue: Queue<LogDTO>,
-    ) { }
+  constructor(
+    @InjectQueue('activity-log-queue')
+    private readonly queue: Queue<LogDTO>,
+  ) {}
 
-    async log(dto: LogDTO) {
-        await this.queue.add('log', dto, {
-            removeOnComplete: true,
-        });
-    }
+  async log(dto: LogDTO) {
+    await this.queue.add('log', dto, {
+      removeOnComplete: true,
+    });
+  }
 
-    async logSuccessful(dto: Omit<LogDTO, 'status'>) {
-        await this.log({
-            ...dto,
-            status: ActivityStatus.SUCCESS,
-        });
-    }
+  async logSuccessful(dto: Omit<LogDTO, 'status'>) {
+    await this.log({
+      ...dto,
+      status: ActivityStatus.SUCCESS,
+    });
+  }
 
-    async logFailed(dto: Omit<LogDTO, 'status'>) {
-        await this.log({
-            ...dto,
-            status: ActivityStatus.FAILED,
-        });
-    }
+  async logFailed(dto: Omit<LogDTO, 'status'>) {
+    await this.log({
+      ...dto,
+      status: ActivityStatus.FAILED,
+    });
+  }
 }

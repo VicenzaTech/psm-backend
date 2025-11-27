@@ -10,4 +10,4 @@ import { AuthModule } from 'src/auth/auth.module';
   controllers: [StageAssignmentController],
   exports: [StageAssignmentService],
 })
-export class StageAssignmentModule { }
+export class StageAssignmentModule {}

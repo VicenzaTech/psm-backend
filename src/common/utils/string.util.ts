@@ -1,1 +1,1 @@
-export const normalizeString = (str: string) => str.trim()
+export const normalizeString = (str: string) => str.trim();

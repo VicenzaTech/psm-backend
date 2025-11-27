@@ -193,14 +193,15 @@ model Permission {
 // ======================================================================
 
 enum Shift {
-    A
-    B
-    C
+    D // D: Ca Ngày
+    N // N: Ca Đêm
+
+    A // A: Cả Ngày
 }
 
 enum DataSource {
-    auto_sync
-    manual_input
+    auto_sync // Tự đồng bộ
+    manual_input // Nhập thủ công
     adjusted
 }
 
@@ -260,7 +261,6 @@ enum StageStatus {
     ERROR
     STOPPED
 }
-
 
 model StageDeviceMapping {
     id                   Int            @id @default(autoincrement())
@@ -324,21 +324,21 @@ model ProductionPlan {
 // ======================================================================
 
 model StageAssignment {
-    id               Int       @id @default(autoincrement())
-    productionLineId Int       @map("production_line_id")
-    productionPlanId Int       @map("production_plan_id")
-    brickTypeId      Int       @map("brick_type_id")
+    id               Int         @id @default(autoincrement())
+    productionLineId Int         @map("production_line_id")
+    productionPlanId Int         @map("production_plan_id")
+    brickTypeId      Int         @map("brick_type_id")
     stage            Stage
     status           StageStatus @default(WAITING) @map("status")
-    isActive         Boolean   @default(true) @map("is_active")
-    startTime        DateTime  @default(now()) @map("start_time") @db.Timestamptz(6)
-    endTime          DateTime? @map("end_time") @db.Timestamptz(6)
-    actualQuantity   Decimal   @default("0") @map("actual_quantity") @db.Decimal(10, 2)
-    targetQuantity   Decimal?  @map("target_quantity") @db.Decimal(10, 2)
-    notes            String?   @db.Text
-    createdBy        String    @map("created_by") @db.VarChar(100)
-    createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-    updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+    isActive         Boolean     @default(true) @map("is_active")
+    startTime        DateTime    @default(now()) @map("start_time") @db.Timestamptz(6)
+    endTime          DateTime?   @map("end_time") @db.Timestamptz(6)
+    actualQuantity   Decimal     @default("0") @map("actual_quantity") @db.Decimal(10, 2)
+    targetQuantity   Decimal?    @map("target_quantity") @db.Decimal(10, 2)
+    notes            String?     @db.Text
+    createdBy        String      @map("created_by") @db.VarChar(100)
+    createdAt        DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+    updatedAt        DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
 
     productionLine   ProductionLine         @relation(fields: [productionLineId], references: [id])
     productionPlan   ProductionPlan         @relation(fields: [productionPlanId], references: [id])
@@ -364,6 +364,8 @@ model DailyStageProduction {
     shift             Shift?
     actualQuantity    Decimal    @default("0") @map("actual_quantity") @db.Decimal(10, 2)
     wasteQuantity     Decimal    @default("0") @map("waste_quantity") @db.Decimal(10, 2)
+    startCounter      Decimal?   @map("start_counter") @db.Decimal(10, 2)
+    endCounter        Decimal?   @map("end_counter") @db.Decimal(10, 2)
     dataSource        DataSource @default(auto_sync) @map("data_source")
     recordedBy        String?    @map("recorded_by") @db.VarChar(100)
     notes             String?    @db.Text
@@ -424,7 +426,6 @@ model MeasurementCache {
 
     @@index([stageAssignmentId, timestamp])
     @@index([deviceId, timestamp])
-    // Tối ưu thêm: query nhanh theo device + type + time
     @@index([deviceId, measurementTypeId, timestamp])
     @@map("measurement_cache")
 }

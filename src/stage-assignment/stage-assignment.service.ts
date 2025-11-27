@@ -1,10 +1,14 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+    BadRequestException,
+    Injectable,
+    NotFoundException,
+} from '@nestjs/common';
+import { Prisma, StageStatus } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Stage } from 'src/stage-device-mapping/stage.enum';
-import { OkResponse } from 'src/common/type/response.type';
 import { ActivityEntityType } from 'src/activity-log/activity-log.enum';
+import { OkResponse } from 'src/common/type/response.type';
 import { PlanStatus } from 'src/production-plan/production-plan.enum';
-import { StageStatus } from '@prisma/client';
+import { Stage } from 'src/stage-device-mapping/stage.enum';
 
 export interface CreateStageAssignmentInput {
     productionPlanId: number;
@@ -25,8 +29,32 @@ export interface UpdateStageAssignmentInput {
 export class StageAssignmentService {
     constructor(private readonly prisma: PrismaService) { }
 
-    async findAll(params?: { productionPlanId?: number; productionLineId?: number; }) {
-        const where: any = {};
+    async findAll(params?: {
+        productionPlanId?: number;
+        productionLineId?: number;
+    }) {
+        const where: Prisma.StageAssignmentWhereInput = {};
+
+        if (typeof params?.productionPlanId === 'number') {
+            where.productionPlanId = params.productionPlanId;
+        }
+        if (typeof params?.productionLineId === 'number') {
+            where.productionLineId = params.productionLineId;
+        }
+
+        return this.prisma.stageAssignment.findMany({
+            where,
+            orderBy: { id: 'asc' },
+        });
+    }
+
+    async findActive(params?: {
+        productionPlanId?: number;
+        productionLineId?: number;
+    }) {
+        const where: Prisma.StageAssignmentWhereInput = {
+            isActive: true,
+        };
 
         if (typeof params?.productionPlanId === 'number') {
             where.productionPlanId = params.productionPlanId;
@@ -67,10 +95,15 @@ export class StageAssignmentService {
         });
 
         if (!plan) {
-            throw new NotFoundException(`Production plan with id ${productionPlanId} not found`);
+            throw new NotFoundException(
+                `Production plan with id ${productionPlanId} not found`,
+            );
         }
 
-        if (plan.status === PlanStatus.CANCELLED || plan.status === PlanStatus.COMPLETED) {
+        if (
+            plan.status === PlanStatus.CANCELLED ||
+            plan.status === PlanStatus.COMPLETED
+        ) {
             throw new BadRequestException(
                 'Cannot create stage assignment for completed or cancelled plan',
             );
@@ -115,10 +148,17 @@ export class StageAssignmentService {
         } as OkResponse;
     }
 
+    /**
+     * API chuyên cho đổi trạng thái (start/stop/wait/error) sẽ gọi hàm này.
+     */
+    async updateStageStatus(id: number, stageStatus: StageStatus) {
+        return this.update(id, { status: stageStatus });
+    }
+
     async update(id: number, input: UpdateStageAssignmentInput) {
         const existing = await this.findOne(id);
 
-        const data: any = {};
+        const data: Prisma.StageAssignmentUpdateInput = {};
 
         if (typeof input.targetQuantity === 'number') {
             data.targetQuantity = input.targetQuantity;
@@ -162,8 +202,8 @@ export class StageAssignmentService {
                 description: `Đã cập nhật phân công công đoạn ${updated.stage} (id: ${updated.id})`,
                 meta: {
                     before: JSON.stringify(existing),
-                    after: JSON.stringify(updated)
-                }
+                    after: JSON.stringify(updated),
+                },
             },
         } as OkResponse;
     }
@@ -185,7 +225,11 @@ export class StageAssignmentService {
 
         const updated = await this.prisma.stageAssignment.update({
             where: { id: existing.id },
-            data: { isActive: false, endTime: new Date(), status: StageStatus.STOPPED },
+            data: {
+                isActive: false,
+                endTime: new Date(),
+                status: StageStatus.STOPPED,
+            },
         });
 
         await this.recomputePlanStatusForPlan(updated.productionPlanId);
@@ -198,19 +242,19 @@ export class StageAssignmentService {
                 actionType: 'STOP_STAGE_ASSIGNMENT',
                 description: `Đã dừng phân công công đoạn ${updated.stage} (id: ${updated.id})`,
                 meta: {
-                    before: existing.isActive ? "true" : "false",
-                    after: updated.isActive ? "true" : "false"
-                }
+                    before: existing.isActive ? 'true' : 'false',
+                    after: updated.isActive ? 'true' : 'false',
+                },
             },
         } as OkResponse;
     }
 
     /**
-     * Helper: sau khi trạng thái StageAssignment thay đổi,
-     * tự động nâng trạng thái ProductionPlan từ APPROVED -> IN_PROGRESS
+     * Helper: Sau khi trạng thái StageAssignment thay đổi,
+     * tự nâng trạng thái ProductionPlan từ APPROVED -> IN_PROGRESS
      * nếu có bất kỳ assignment RUNNING.
      *
-     * Không tự động COMPLETE / CANCEL – việc đó vẫn do ProductionPlanService quyết định.
+     * Không tự COMPLETE / CANCEL – việc đó vẫn do ProductionPlanService quyết định.
      */
     private async recomputePlanStatusForPlan(planId: number): Promise<void> {
         const plan = await this.prisma.productionPlan.findUnique({
@@ -240,4 +284,3 @@ export class StageAssignmentService {
         }
     }
 }
-

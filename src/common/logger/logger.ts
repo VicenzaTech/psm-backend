@@ -26,9 +26,7 @@ export class ApplicationLogger implements LoggerService {
           return `[PSM-MANAGER] - [${timestamp}] ${level}${ctx}: ${message}`;
         }),
       ),
-      transports: [
-        new transports.Console()
-      ],
+      transports: [new transports.Console()],
     });
   }
 

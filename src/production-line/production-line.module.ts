@@ -7,9 +7,9 @@ import { RedisModule } from '../common/redis/redis.module';
 import { BrickTypeModule } from 'src/brick-type/brick-type.module';
 
 @Module({
-    imports: [PrismaModule, AuthModule, RedisModule],
-    controllers: [ProductionLineController],
-    providers: [ProductionLineService],
-    exports: [ProductionLineService]
+  imports: [PrismaModule, AuthModule, RedisModule],
+  controllers: [ProductionLineController],
+  providers: [ProductionLineService],
+  exports: [ProductionLineService],
 })
-export class ProductionLineModule { }
+export class ProductionLineModule {}

@@ -5,7 +5,10 @@ declare module '@nestjs/bullmq' {
   }
 
   export interface BullModuleType {
-    forRootAsync(options: { inject?: any[]; useFactory: (...args: any[]) => any }): any;
+    forRootAsync(options: {
+      inject?: any[];
+      useFactory: (...args: any[]) => any;
+    }): any;
     registerQueue(queue: any): any;
   }
 
