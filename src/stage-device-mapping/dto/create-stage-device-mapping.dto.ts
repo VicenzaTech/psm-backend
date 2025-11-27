@@ -1,4 +1,11 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsString, IsBoolean, IsOptional } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  IsBoolean,
+  IsOptional,
+} from 'class-validator';
 import { Stage } from '../stage.enum';
 
 export class CreateStageDeviceMapping {

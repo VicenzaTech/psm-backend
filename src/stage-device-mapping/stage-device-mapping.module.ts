@@ -6,8 +6,8 @@ import { ProductionBackendModule } from 'src/production-backend/production-backe
 import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
-    controllers: [StageDeviceMappingController],
-    providers: [StageDeviceMappingService],
-    imports: [PrismaModule, ProductionBackendModule, AuthModule],
+  controllers: [StageDeviceMappingController],
+  providers: [StageDeviceMappingService],
+  imports: [PrismaModule, ProductionBackendModule, AuthModule],
 })
-export class StageDeviceMappingModule { }
+export class StageDeviceMappingModule {}

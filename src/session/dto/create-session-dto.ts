@@ -1,14 +1,14 @@
-import { IsNumber, IsString } from "class-validator";
+import { IsNumber, IsString } from 'class-validator';
 
 export class CreateSessionDTO {
-    @IsNumber()
-    userId: number;
-    @IsString()
-    userAgent: string;
-    @IsString()
-    ip: string;
-    @IsNumber()
-    ttlSeconds: number;
-    @IsString()
-    refreshToken: string;
+  @IsNumber()
+  userId: number;
+  @IsString()
+  userAgent: string;
+  @IsString()
+  ip: string;
+  @IsNumber()
+  ttlSeconds: number;
+  @IsString()
+  refreshToken: string;
 }

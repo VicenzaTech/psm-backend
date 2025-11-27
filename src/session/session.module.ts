@@ -6,6 +6,6 @@ import { HashModule } from 'src/common/hash/hash.module';
 @Module({
   providers: [SessionService],
   imports: [RedisModule, HashModule],
-  exports: [SessionService]
+  exports: [SessionService],
 })
 export class SessionModule {}

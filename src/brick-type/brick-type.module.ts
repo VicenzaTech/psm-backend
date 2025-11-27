@@ -9,6 +9,6 @@ import { AuthModule } from 'src/auth/auth.module';
   imports: [PrismaModule, RedisModule, AuthModule],
   providers: [BrickTypeService],
   controllers: [BrickTypeController],
-  exports: [BrickTypeService]
+  exports: [BrickTypeService],
 })
 export class BrickTypeModule {}

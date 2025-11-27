@@ -1,24 +1,23 @@
 import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class UpdateProductionLineDTO {
-    @IsNumber()
-    @IsOptional()
-    workshopId?: number;
+  @IsNumber()
+  @IsOptional()
+  workshopId?: number;
 
-    @IsString()
-    @IsOptional()
-    code?: string;
+  @IsString()
+  @IsOptional()
+  code?: string;
 
-    @IsString()
-    @IsOptional()
-    name?: string;
+  @IsString()
+  @IsOptional()
+  name?: string;
 
-    @IsNumber()
-    @IsOptional()
-    iotClusterId?: number;
+  @IsNumber()
+  @IsOptional()
+  iotClusterId?: number;
 
-    @IsBoolean()
-    @IsOptional()
-    isActive?: boolean;
+  @IsBoolean()
+  @IsOptional()
+  isActive?: boolean;
 }
-

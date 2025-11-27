@@ -4,10 +4,9 @@ import { ProductionBackendService } from './production-backend.service';
 import { ProductionBackendController } from './production-backend.controller';
 
 @Module({
-    imports: [ConfigModule],
-    controllers: [ProductionBackendController],
-    providers: [ProductionBackendService],
-    exports: [ProductionBackendService],
+  imports: [ConfigModule],
+  controllers: [ProductionBackendController],
+  providers: [ProductionBackendService],
+  exports: [ProductionBackendService],
 })
-export class ProductionBackendModule { }
-
+export class ProductionBackendModule {}

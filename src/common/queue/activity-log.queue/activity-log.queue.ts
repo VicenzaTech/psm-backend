@@ -5,13 +5,12 @@ import { ActivityLogConsumer } from './activity-log.consumer';
 
 @Global()
 @Module({
-    imports: [
-        BullModule.registerQueue({
-            name: 'activity-log-queue',
-        }),
-    ],
-    providers: [ActivityLogProviderService, ActivityLogConsumer],
-    exports: [ActivityLogProviderService],
+  imports: [
+    BullModule.registerQueue({
+      name: 'activity-log-queue',
+    }),
+  ],
+  providers: [ActivityLogProviderService, ActivityLogConsumer],
+  exports: [ActivityLogProviderService],
 })
-export class ActivityLogQueueModule { }
-
+export class ActivityLogQueueModule {}
